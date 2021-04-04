@@ -26,52 +26,75 @@ class Edge(object):
         self.pointB = pointB
         self.distance = distance
 
-def Manhatthan(x, y, goalNode):
+def manhatthan(x, y, goalNode):
     return (abs(x - goalNode.position[0]) + abs(y - goalNode.position[1]))
 
-def aStar(start, goal, grid):
-    #The open and closed sets
-    openset = set()
-    closedset = set()
-    #Current point is the starting point
-    current = start
-    #Add the starting point to the open set
-    openset.add(current)
-    #While the open set is not empty
-    while openset:
-        #Find the item in the open set with the lowest G + H score
-        current = min(openset, key=lambda o:o.G + o.H)
-        #If it is the item we want, retrace the path and return it
-        if current == goal:
-            path = []
-            while current.parent:
-                path.append(current)
-                current = current.parent
-            path.append(current)
-            return path[::-1]
-        #Remove the item from the open set
-        openset.remove(current)
-        #Add it to the closed set
-        closedset.add(current)
-        #Loop through the node's children/siblings
-        for node in children(current,grid):
-            #If it is already in the closed set, skip it
-            if node in closedset:
-                continue
-            #Otherwise if it is already in the open set
-            if node in openset:
-                #Check if we beat the G score 
-                new_g = current.G + current.move_cost(node)
-                if node.G > new_g:
-                    #If so, update the node to have a new parent
-                    node.G = new_g
-                    node.parent = current
-            else:
-                #If it isn't in the open set, calculate the G and H score for the node
-                node.G = current.G + current.move_cost(node)
-                node.H = manhattan(node, goal)
-                #Set the parent to our current item
-                node.parent = current
-                #Add it to the set
-                openset.add(node)
+class NodeList(list):
+    def find(self, position):
+        actual = [node for node in self if node.position == position]
+        return actual[0] if actual != [] else None
+       
 
+    def remove(self, node):
+        del self[self.index(node)]
+
+def astar(startNode,goalNode,graph):
+    #Se crea openList y closeList
+    openList = NodeList()
+    closeList = NodeList()
+    #Se añade el startNode a la openList
+    openList.append(startNode)
+    while True:
+        #Si la openList está vacia ya fue la vida
+        if openList == []:
+            print("No fue posible encontrar una ruta")
+            exit(1);
+        #Se selecciona el node de menor peso en su f, el primero MEJORNODO
+        node = min(openList, key=lambda x: x.fs)
+        #Se remueve de la openList porque ya será visitado
+        openList.remove(node)
+        #Se añade de la closeList porque...
+        closeList.append(node)
+        #Condición de victoria
+        if node.isGoal(goalNode):
+            endNode = node
+            break
+        #Se calcula el g(node) actual
+        node_gs = node.fs - node.heuristicValue
+        #Al no llegar a la solución con el node actual, se selecciona uno mejor del grafo 
+        # respecto a MEJORNODO
+        for v in graph.adjacencyList[node.position]:
+            pointB = v.pointB
+            sucesor = openList.find(pointB)
+            #Se alamcena la distancia en variable para sumas posteriores
+            distance = v.distance
+            #el node node (actual) pasa a ser el node node (viejo) ahora
+            if sucesor:         #n_gs + sucesor.hs + distance = f(node)    
+                #Si el peso total (f) de sucesor > f(node)
+                if sucesor.fs > node_gs + sucesor.hs + distance:
+                    sucesor.fs = node_gs + sucesor.hs + distance
+                    #Se le añade su nodoviejo al ser correcto que es mayor
+                    sucesor.parent_node = node
+            else:
+                sucesor = closeList.find(pointB)
+                if sucesor:
+                    if sucesor.fs > node_gs + sucesor.hs + distance:
+                        sucesor.fs = node_gs + sucesor.hs + distance
+                        sucesor.parent_node = node
+                        openList.append(sucesor)
+                        closeList.remove(sucesor)
+                else:
+                    sucesor = Node(pointB)
+                    sucesor.fs = node_gs + sucesor.hs + distance
+                    sucesor.parent_node = node
+                    openList.append(sucesor)
+                    print(node.position + ' a ' + sucesor.position + ': ' + str(sucesor.hs+distance) + ' = ' + str(distance) + ' + ' + str(sucesor.heuristicValue))
+#node = endNode
+#sol = []
+#while True:
+#    sol.append(node.city)
+#    if node.parent_node == None:
+#        break
+#    node = node.parent_node
+#sol.reverse()
+#print(list(sol))
