@@ -14,9 +14,10 @@
 class Node(object):
     def __init__(self,position):
         self.position = position
-        self.heuristicValue = 10
+        self.heuristicValue = 0
         self.fs = 0
         self.parentNode = None
+        self.adjacencyList = []
 
     def isGoal(self,goalNode):
         return goalNode == self.position
@@ -48,7 +49,7 @@ def astar(startNode,goalNode,graph):
         #Si la openList está vacia ya fue la vida
         if openList == []:
             print("No fue posible encontrar una ruta")
-            exit(1);
+            exit(1)
         #Se selecciona el node de menor peso en su f, el primero MEJORNODO
         node = min(openList, key=lambda x: x.fs)
         #Se remueve de la openList porque ya será visitado
@@ -56,45 +57,36 @@ def astar(startNode,goalNode,graph):
         #Se añade de la closeList porque...
         closeList.append(node)
         #Condición de victoria
-        if node.isGoal(goalNode):
+        if node.isGoal(goalNode.position):
             endNode = node
-            break
+            return endNode
         #Se calcula el g(node) actual
         node_gs = node.fs - node.heuristicValue
         #Al no llegar a la solución con el node actual, se selecciona uno mejor del grafo 
         # respecto a MEJORNODO
-        for v in graph.adjacencyList[node.position]:
-            pointB = v.pointB
-            sucesor = openList.find(pointB)
+        for v in node.adjacencyList:
+            nodeB = graph.findNode(v.pointB)
+            sucesor = openList.find(nodeB)
             #Se alamcena la distancia en variable para sumas posteriores
-            distance = v.distance
+            distance = v.distance 
             #el node node (actual) pasa a ser el node node (viejo) ahora
             if sucesor:         #n_gs + sucesor.heuristicValue + distance = f(node)    
                 #Si el peso total (f) de sucesor > f(node)
                 if sucesor.fs > node_gs + sucesor.heuristicValue + distance:
                     sucesor.fs = node_gs + sucesor.heuristicValue + distance
                     #Se le añade su nodoviejo al ser correcto que es mayor
-                    sucesor.parent_node = node
+                    sucesor.parentNode = node
             else:
-                sucesor = closeList.find(pointB)
+                sucesor = closeList.find(nodeB.position)
                 if sucesor:
                     if sucesor.fs > node_gs + sucesor.heuristicValue + distance:
                         sucesor.fs = node_gs + sucesor.heuristicValue + distance
-                        sucesor.parent_node = node
+                        sucesor.parentNode = node
                         openList.append(sucesor)
                         closeList.remove(sucesor)
                 else:
-                    sucesor = Node(pointB)
+                    sucesor = graph.findNode(nodeB.position)
                     sucesor.fs = node_gs + sucesor.heuristicValue + distance
-                    sucesor.parent_node = node
+                    sucesor.parentNode = node
                     openList.append(sucesor)
                     print(str(node.position) + ' a ' + str(sucesor.position) + ': ' + str(sucesor.heuristicValue+distance) + ' = ' + str(distance) + ' + ' + str(sucesor.heuristicValue))
-#node = endNode
-#sol = []
-#while True:
-#    sol.append(node.city)
-#    if node.parent_node == None:
-#        break
-#    node = node.parent_node
-#sol.reverse()
-#print(list(sol))

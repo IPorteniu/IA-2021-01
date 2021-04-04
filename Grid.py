@@ -7,11 +7,10 @@ class Grid(object):
     def __init__(self):
         self._lenght = 0
         self._width = 0
-        self._startNode = None
-        self._goalNode = None
+        self._start = None
+        self._goal = None
         self._heuristics = dict()
         self._graph = dict()
-        self.adjacencyList = dict()
     
     def getLenght(self):
         return self._lenght
@@ -55,36 +54,36 @@ class Grid(object):
         # Para la creacion de las heuristicas usaremos Manhatthan
         for x in range(0,self._lenght,10):
             for y in range(0, self._width,10):
-                self._heuristics[(x,y)] = manhatthan(x, y, self._goalNode)
+                self._heuristics[(x,y)] = manhatthan(x, y, self._goal)
 
     def __createGraph(self):
         for point in self._heuristics:
             actualNode = Node(point)
             actualNode.heuristicValue = self._heuristics[point]
             self._graph[point] = actualNode
-        
-    def __createAdjacencyList(self):
-        for key in self._heuristics:
-            self.adjacencyList[key] = []
     
-    def addEdge(self, pointA, pointB, distance):   
-        self.adjacencyList[pointA].append(Edge(pointB, distance))
-        self.adjacencyList[pointB].append(Edge(pointA, distance))
+    def addEdge(self, pointA, pointB, distance): 
+        nodeA = self.findNode(pointA)  
+        nodeB = self.findNode(pointB)  
+        
+        nodeA.adjacencyList.append(Edge(pointB, distance))
+        nodeB.adjacencyList.append(Edge(pointA, distance))
   
     def findNode(self, position):
         return self._graph[position]
     
     def findPath(self):
-        astar(self.findNode(self._startNode) , self.findNode(self._goalNode) ,self)
+        startNode = self.findNode(self._start)
+        goalNode = self.findNode(self._goal)
+        return astar(startNode , goalNode, self)
 
-    def buildGrid(self, lenght, width, startNode,goalNode):
+    def buildGrid(self, lenght, width, start,goal):
         self._lenght = lenght
         self._width = width
-        self._startNode = startNode
-        self._goalNode = goalNode
+        self._start = start
+        self._goal = goal
         self.__createHeuristics()
         self.__createGraph()
-        self.__createAdjacencyList()
         self.__createEdges()
 
         
