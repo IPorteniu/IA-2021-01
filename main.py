@@ -10,8 +10,8 @@ width = 40
 
 #Se asigna la meta y el inicio
 
-goalNode = Node((40, 30))
-startNode = Node((0, 0))
+goalNode = (30, 30)
+startNode = (0, 0)
 graph = Grid()
 graph.buildGrid(lenght, width,startNode,goalNode)
 graph.findPath()

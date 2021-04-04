@@ -14,7 +14,7 @@
 class Node(object):
     def __init__(self,position):
         self.position = position
-        self.heuristicValue = None
+        self.heuristicValue = 10
         self.fs = 0
         self.parentNode = None
 
@@ -27,7 +27,7 @@ class Edge(object):
         self.distance = distance
 
 def manhatthan(x, y, goalNode):
-    return (abs(x - goalNode.position[0]) + abs(y - goalNode.position[1]))
+    return (abs(x - goalNode[0]) + abs(y - goalNode[1]))
 
 class NodeList(list):
     def find(self, position):
@@ -69,26 +69,26 @@ def astar(startNode,goalNode,graph):
             #Se alamcena la distancia en variable para sumas posteriores
             distance = v.distance
             #el node node (actual) pasa a ser el node node (viejo) ahora
-            if sucesor:         #n_gs + sucesor.hs + distance = f(node)    
+            if sucesor:         #n_gs + sucesor.heuristicValue + distance = f(node)    
                 #Si el peso total (f) de sucesor > f(node)
-                if sucesor.fs > node_gs + sucesor.hs + distance:
-                    sucesor.fs = node_gs + sucesor.hs + distance
+                if sucesor.fs > node_gs + sucesor.heuristicValue + distance:
+                    sucesor.fs = node_gs + sucesor.heuristicValue + distance
                     #Se le añade su nodoviejo al ser correcto que es mayor
                     sucesor.parent_node = node
             else:
                 sucesor = closeList.find(pointB)
                 if sucesor:
-                    if sucesor.fs > node_gs + sucesor.hs + distance:
-                        sucesor.fs = node_gs + sucesor.hs + distance
+                    if sucesor.fs > node_gs + sucesor.heuristicValue + distance:
+                        sucesor.fs = node_gs + sucesor.heuristicValue + distance
                         sucesor.parent_node = node
                         openList.append(sucesor)
                         closeList.remove(sucesor)
                 else:
                     sucesor = Node(pointB)
-                    sucesor.fs = node_gs + sucesor.hs + distance
+                    sucesor.fs = node_gs + sucesor.heuristicValue + distance
                     sucesor.parent_node = node
                     openList.append(sucesor)
-                    print(node.position + ' a ' + sucesor.position + ': ' + str(sucesor.hs+distance) + ' = ' + str(distance) + ' + ' + str(sucesor.heuristicValue))
+                    print(str(node.position) + ' a ' + str(sucesor.position) + ': ' + str(sucesor.heuristicValue+distance) + ' = ' + str(distance) + ' + ' + str(sucesor.heuristicValue))
 #node = endNode
 #sol = []
 #while True:

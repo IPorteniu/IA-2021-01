@@ -7,11 +7,11 @@ class Grid(object):
     def __init__(self):
         self._lenght = 0
         self._width = 0
-        self._startNode = Node
-        self._goalNode = Node
+        self._startNode = None
+        self._goalNode = None
         self._heuristics = dict()
         self._graph = dict()
-        self._adjacencyList = dict()
+        self.adjacencyList = dict()
     
     def getLenght(self):
         return self._lenght
@@ -65,17 +65,17 @@ class Grid(object):
         
     def __createAdjacencyList(self):
         for key in self._heuristics:
-            self._adjacencyList[key] = []
+            self.adjacencyList[key] = []
     
     def addEdge(self, pointA, pointB, distance):   
-        self._adjacencyList[pointA].append(Edge(pointB, distance))
-        self._adjacencyList[pointB].append(Edge(pointA, distance))
+        self.adjacencyList[pointA].append(Edge(pointB, distance))
+        self.adjacencyList[pointB].append(Edge(pointA, distance))
   
     def findNode(self, position):
         return self._graph[position]
     
     def findPath(self):
-        astar(self._startNode,self._goalNode,self._graph)
+        astar(self.findNode(self._startNode) , self.findNode(self._goalNode) ,self)
 
     def buildGrid(self, lenght, width, startNode,goalNode):
         self._lenght = lenght
@@ -83,8 +83,6 @@ class Grid(object):
         self._startNode = startNode
         self._goalNode = goalNode
         self.__createHeuristics()
-        self._startNode = self.findNode(startNode)
-        self._goalNode = self.findNode(goalNode)
         self.__createGraph()
         self.__createAdjacencyList()
         self.__createEdges()
