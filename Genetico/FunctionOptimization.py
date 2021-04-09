@@ -92,6 +92,7 @@ def Mutacion(Individuos):
         print("****")
     Mostrar(Individuos)
 
+#Función para demostrar el incremento de valores
 def promedios(Individuos):
     promedio = 0
     for individuo in Individuos:
