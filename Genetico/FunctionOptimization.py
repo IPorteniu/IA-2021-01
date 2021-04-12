@@ -4,7 +4,7 @@ import numpy
 # pip install tabulate
 from tabulate import tabulate
 
-Individuos = numpy.random.choice(range(0,31),6)
+numeros = numpy.random.choice(range(0,31),6)
 
 #Clase individuos
 class Individuo(object):
@@ -24,10 +24,10 @@ class Individuo(object):
         self.binary = binary_string[2:]
 
 #Función para seleccionar individuos dentro de los 32 posibles
-def Inicializar(Individuos):
+def Inicializar(numeros):
     Individuos = []
     for i in range(6):
-        Individuos.append(Individuo(i, Individuos[i]))
+        Individuos.append(Individuo(i, numeros[i]))
         Individuos[i].calcular()
     Mostrar(Individuos)
     return Individuos
@@ -106,7 +106,7 @@ def Mostrar(Individuos):
     print(tabulate(data,headers=["ID", "Binario","Valor de X", "Valor de f(x)"]))
 
 
-Individuos = Inicializar(Individuos)
+Individuos = Inicializar(numeros)
 Seleccion(Individuos)
 Cruce(Individuos)
 Mutacion(Individuos)
