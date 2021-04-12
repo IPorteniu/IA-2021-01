@@ -4,8 +4,9 @@ import numpy
 # pip install tabulate
 from tabulate import tabulate
 
-numeros = numpy.random.choice(range(0,31),6)
+Individuos = numpy.random.choice(range(0,31),6)
 
+#Clase individuos
 class Individuo(object):
     def __init__(self, id,x):
         self.id = id
@@ -22,14 +23,16 @@ class Individuo(object):
         binary_string =  str(bin(self.x))
         self.binary = binary_string[2:]
 
-def Inicializar(numeros):
+#Función para seleccionar individuos dentro de los 32 posibles
+def Inicializar(Individuos):
     Individuos = []
     for i in range(6):
-        Individuos.append(Individuo(i, numeros[i]))
+        Individuos.append(Individuo(i, Individuos[i]))
         Individuos[i].calcular()
     Mostrar(Individuos)
     return Individuos
 
+#Función para determinar las parejas de los seleccionados
 def Parejas():
     Aleatorio = random.sample(range(3,6), 3)
     Pareja = {}
@@ -38,6 +41,7 @@ def Parejas():
         Pareja[Aleatorio[i]] = i
     return Pareja
 
+#Función para seleccionar a la mejor pareja de las establecidas según mayor f(x)
 def Seleccion(Individuos):
     print('---Seleccion---')
     Pareja = Parejas()
@@ -46,15 +50,8 @@ def Seleccion(Individuos):
         if Individuos[key].f_value >= Individuos[value].f_value:
             Individuos[value] = Individuos[key]
     Mostrar(Individuos)
-            
-def Mostrar(Individuos):
-    data = []
-    for i in range(6):
-        aux = [Individuos[i].id, Individuos[i].binary, Individuos[i].x, Individuos[i].f_value]
-        data.append(aux)
-        #print(Individuos[i].id,'f(x)=', Individuos[i].f_value)
-    print(tabulate(data,headers=["ID", "Binario","Valor de X", "Valor de f(x)"]))
 
+#Función para cruzar a los individuos
 def Cruce(Individuos):
     print('----Cruce----') 
     Pareja = Parejas()
@@ -82,6 +79,7 @@ def Cruce(Individuos):
         item = item + 1
     Mostrar(Individuos)
 
+#Función para mutar a los hijos luego del cruce basada en probabilidad de mutación
 def Mutacion(Individuos):
     print('-----Mutacion-----')
     for i in range(3):
@@ -95,11 +93,20 @@ def Mutacion(Individuos):
 #Función para demostrar el incremento de valores
 def promedios(Individuos):
     promedio = 0
-    for individuo in Individuos:
-        promedio += individuo.f_value
+    for Individuo in Individuos:
+        promedio += Individuo.f_value
     print("El promedio es", promedio/6)
 
-Individuos = Inicializar(numeros)
+#Función para imprimir los resultados de cada paso en tablas            
+def Mostrar(Individuos):
+    data = []
+    for i in range(6):
+        aux = [Individuos[i].id, Individuos[i].binary, Individuos[i].x, Individuos[i].f_value]
+        data.append(aux)
+    print(tabulate(data,headers=["ID", "Binario","Valor de X", "Valor de f(x)"]))
+
+
+Individuos = Inicializar(Individuos)
 Seleccion(Individuos)
 Cruce(Individuos)
 Mutacion(Individuos)
