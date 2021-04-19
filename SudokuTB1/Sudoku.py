@@ -49,6 +49,7 @@ class Sudoku(object):
         self.sudoku = sudoku
         self.cellHeuristic = {}
         self.queue = []
+        self.isSolution = False
 
     def validation(self, row, column, value):
         # Validar si existe el mismo numero en la fila o la columna
@@ -73,12 +74,18 @@ class Sudoku(object):
 
     def ia_insert(self):
         self.heuristics()
-        cell = self.queue.pop()
-        for it in range(1, 10):
-            if self.validation(cell[0], cell[1], it) == True:
-                self.sudoku[cell[0]][cell[1]] = it
-                print(it,cell[0],cell[1])
-                break
+        if len(self.queue) != 0:
+            cell = self.queue.pop()
+            for it in range(1, 10):
+                if self.validation(cell[0], cell[1], it) == True:
+                    self.sudoku[cell[0]][cell[1]] = it
+                    # print(it,cell[0],cell[1])
+                    # print("I've found a solution")
+                    break
+        else:
+            self.isSolution = True
+            return
+
 
     def insert(self, row, column, value):
         if self.validation(row, column, value) == True:
@@ -104,15 +111,19 @@ class Sudoku(object):
                 if self.sudoku[i][j] == 0:
                     self.cellHeuristic[i, j] = 1 / \
                         self.__calculate_options__(i, j)
-        self.queue.append(self.__get_random_max_cell_heuristic__())
+        if list(self.cellHeuristic.values()) != []:
+            self.queue.append(self.__get_random_max_cell_heuristic__())
 
     def __get_random_max_cell_heuristic__(self):
-
         maxval = max(self.cellHeuristic.values())
         res = [k for k, v in self.cellHeuristic.items() if v == maxval]
-        print(res)
-        pos = random.randint(0, len(res)-1)
-        return res[pos]
+        # if len(res) >= 2:
+        #     print(len(res))
+        #     pos = random.randint(0, len(res))
+        #     return res[pos-1]
+        # print(len(res))
+        return res[0]
+        
 
     def __calculate_options__(self, row, column):
 
@@ -134,11 +145,14 @@ class Sudoku(object):
         return options
 
 
-# start = timer()
-# end = timer()
-# print(end - start)
-game = Sudoku(example2)
-for i in range(46):
+start = timer()
+game = Sudoku(example)
+print("\nSudoku inicial\n\n")
+game.show()
+while game.isSolution != True:
     game.ia_insert()
+end = timer()
+print(end - start)
+print("\nSolucion\n\n")
 game.show()
 print(" ")
