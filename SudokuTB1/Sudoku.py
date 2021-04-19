@@ -21,22 +21,35 @@ solution = [
 ]
 
 example = [
-[0, 0, 0, 2, 6, 0, 7, 0, 1],
-[6, 8, 0, 0, 7, 0, 0, 9, 0],
-[1, 9, 0, 0, 0, 4, 5, 0, 0],
-[8, 2, 0, 1, 0, 0, 0, 4, 0],
-[0, 0, 4, 6, 0, 2, 9, 0, 0],
-[0, 5, 0, 0, 0, 3, 0, 2, 8],
-[0, 0, 9, 3, 0, 0, 0, 7, 4],
-[0, 4, 0, 0, 5, 0, 0, 3, 6],
-[7, 0, 3, 0, 1, 8, 0, 0, 0]
+    [0, 0, 0, 2, 6, 0, 7, 0, 1],
+    [6, 8, 0, 0, 7, 0, 0, 9, 0],
+    [1, 9, 0, 0, 0, 4, 5, 0, 0],
+    [8, 2, 0, 1, 0, 0, 0, 4, 0],
+    [0, 0, 4, 6, 0, 2, 9, 0, 0],
+    [0, 5, 0, 0, 0, 3, 0, 2, 8],
+    [0, 0, 9, 3, 0, 0, 0, 7, 4],
+    [0, 4, 0, 0, 5, 0, 0, 3, 6],
+    [7, 0, 3, 0, 1, 8, 0, 0, 0]
+]
+example2 = [
+    [6, 0, 7, 9, 0, 0, 2, 0, 3],
+    [9, 0, 3, 4, 2, 0, 8, 6, 0],
+    [0, 0, 0, 0, 8, 3, 0, 0, 1],
+    [5, 3, 0, 0, 6, 0, 9, 0, 2],
+    [0, 0, 0, 0, 0, 0, 0, 3, 7],
+    [4, 0, 0, 1, 3, 2, 5, 0, 0],
+    [0, 4, 0, 0, 7, 0, 6, 0, 9],
+    [7, 2, 0, 0, 0, 0, 0, 0, 0],
+    [8, 9, 1, 2, 5, 0, 0, 7, 0]
 ]
 
+
 class Sudoku(object):
-    def __init__(self,sudoku):
+    def __init__(self, sudoku):
         self.sudoku = sudoku
         self.cellHeuristic = {}
         self.queue = []
+
     def validation(self, row, column, value):
         # Validar si existe el mismo numero en la fila o la columna
         if(self.sudoku[row][column] == 0):
@@ -58,19 +71,14 @@ class Sudoku(object):
         else:
             print("No puedes ingresar un numero en esta posicion")
 
-    def choose_value():
-        # Buscar valores que faltan en fila
-        # Buscar valores que faltan en columna
-        # Buscar valores que faltan en caja
-        return None
-
     def ia_insert(self):
         self.heuristics()
         cell = self.queue.pop()
-        value = choose_value()
-        if self.validation(cell[0],cell[1],value ) == True:
-           self.sudoku[cell[0]][cell[1]] = value
-           self.heuristics()
+        for it in range(1, 10):
+            if self.validation(cell[0], cell[1], it) == True:
+                self.sudoku[cell[0]][cell[1]] = it
+                print(it,cell[0],cell[1])
+                break
 
     def insert(self, row, column, value):
         if self.validation(row, column, value) == True:
@@ -78,7 +86,7 @@ class Sudoku(object):
             self.heuristics()
         else:
             print("Estas incumpliendo las reglas")
-    
+
     def show(self):
         for i in range(9):
             mamadisimo = str(self.sudoku[i]).replace(
@@ -88,20 +96,22 @@ class Sudoku(object):
             print(mamadisimo)
             if (i+1) % 3 == 0 and i != 8:
                 print(colored("─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─", 'red'))
-    
+
     def heuristics(self):
         self.cellHeuristic.clear()
         for i in range(9):
             for j in range(9):
                 if self.sudoku[i][j] == 0:
-                    self.cellHeuristic[i,j] = 1 / self.__calculate_options__(i,j)
-        self.queue.append(self.__get_random_min_cell_heuristic__())
-       
-    def __get_random_min_cell_heuristic__(self):
-        
+                    self.cellHeuristic[i, j] = 1 / \
+                        self.__calculate_options__(i, j)
+        self.queue.append(self.__get_random_max_cell_heuristic__())
+
+    def __get_random_max_cell_heuristic__(self):
+
         maxval = max(self.cellHeuristic.values())
-        res = [k for k, v in self.cellHeuristic.items() if v==maxval]
-        pos = random.randint(0,len(res)-1)
+        res = [k for k, v in self.cellHeuristic.items() if v == maxval]
+        print(res)
+        pos = random.randint(0, len(res)-1)
         return res[pos]
 
     def __calculate_options__(self, row, column):
@@ -122,16 +132,13 @@ class Sudoku(object):
                 if self.sudoku[i][j] == 0:
                     options += 1
         return options
-	
-	
-    
+
 
 # start = timer()
 # end = timer()
 # print(end - start)
-
-game = Sudoku(example)
-game.insert(0, 1, 3)
-game.insert(1, 2, 2)
+game = Sudoku(example2)
+for i in range(46):
+    game.ia_insert()
 game.show()
 print(" ")
