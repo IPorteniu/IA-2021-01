@@ -72,7 +72,7 @@ class Sudoku(object):
         else:
             print("No puedes ingresar un numero en esta posicion")
 
-    def fillNumber(self):
+    def fill_number(self):
         self.heuristics()
         if len(self.queue) != 0:
             cell = self.queue.pop()
@@ -87,7 +87,7 @@ class Sudoku(object):
             return
 
 
-    def insertHeuristic(self, row, column, value):
+    def insert_heuristic(self, row, column, value):
         if self.validation(row, column, value) == True:
             self.sudoku[row][column] = value
             self.heuristics()
@@ -112,27 +112,33 @@ class Sudoku(object):
                     self.cellHeuristic[i, j] = 1 / \
                         self.__calculate_options__(i, j)
         if list(self.cellHeuristic.values()) != []:
-            self.queue.append(self.__get_random_max_cell_heuristic__())
+            self.queue.append(self.hill_climbing())
 
+    #Debe retornar una row y column
     def hill_climbing(self):
 
         heuristicVals = [k for k, v in self.cellHeuristic.items()]
         sol = max(self.cellHeuristic.values())
+
         initialNode = heuristicVals[0]
-
         #Aqui empieza hill climbing
-        if initialNode == sol:
-            return initialNode
-       
-        while 1: 
 
-        # old if len(res) >= 2:
-            #     print(len(res))
-            #     pos = random.randint(0, len(res))
-            #     return res[pos-1]
-            # print(len(res))
-        ##return res[0]
-       
+        if self.cellHeuristic[initialNode] == sol:
+            ##print("First node sol, gl!")
+            return initialNode
+        else:
+            actualNode = initialNode
+
+            while self.cellHeuristic[actualNode] != sol:
+                for i in range(1,heuristicVals.__len__()):
+                    neighborNode = heuristicVals[i]
+                    if self.cellHeuristic[neighborNode] == sol:
+                        ##print("Solution found")
+                        return neighborNode
+                    else:
+                        if self.cellHeuristic[neighborNode] > self.cellHeuristic[actualNode]: 
+                            actualNode = neighborNode    
+                              
     def __calculate_options__(self, row, column):
 
         options = 0
@@ -158,7 +164,7 @@ game = Sudoku(example)
 print("\nSudoku inicial\n\n")
 game.show()
 while game.isSolution != True:
-    game.ia_insert()
+    game.fill_number()
 end = timer()
 print(end - start)
 print("\nSolucion\n\n")
