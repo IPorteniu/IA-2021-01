@@ -72,7 +72,7 @@ class Sudoku(object):
         else:
             print("No puedes ingresar un numero en esta posicion")
 
-    def ia_insert(self):
+    def fillNumber(self):
         self.heuristics()
         if len(self.queue) != 0:
             cell = self.queue.pop()
@@ -87,7 +87,7 @@ class Sudoku(object):
             return
 
 
-    def insert(self, row, column, value):
+    def insertHeuristic(self, row, column, value):
         if self.validation(row, column, value) == True:
             self.sudoku[row][column] = value
             self.heuristics()
@@ -114,17 +114,25 @@ class Sudoku(object):
         if list(self.cellHeuristic.values()) != []:
             self.queue.append(self.__get_random_max_cell_heuristic__())
 
-    def __get_random_max_cell_heuristic__(self):
-        maxval = max(self.cellHeuristic.values())
-        res = [k for k, v in self.cellHeuristic.items() if v == maxval]
-        # if len(res) >= 2:
-        #     print(len(res))
-        #     pos = random.randint(0, len(res))
-        #     return res[pos-1]
-        # print(len(res))
-        return res[0]
-        
+    def hill_climbing(self):
 
+        heuristicVals = [k for k, v in self.cellHeuristic.items()]
+        sol = max(self.cellHeuristic.values())
+        initialNode = heuristicVals[0]
+
+        #Aqui empieza hill climbing
+        if initialNode == sol:
+            return initialNode
+       
+        while 1: 
+
+        # old if len(res) >= 2:
+            #     print(len(res))
+            #     pos = random.randint(0, len(res))
+            #     return res[pos-1]
+            # print(len(res))
+        ##return res[0]
+       
     def __calculate_options__(self, row, column):
 
         options = 0
