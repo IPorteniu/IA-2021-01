@@ -1,0 +1,98 @@
+
+def validation(self, row, column, value):
+        # Validar si existe el mismo numero en la fila o la columna
+        if(self.sudoku[row][column] == 0):
+            for it in range(9):
+                if self.sudoku[row][it] == value:
+                    return False
+                if self.sudoku[it][column] == value:
+                    return False
+
+            rowGroup = row//3
+            columnGroup = column//3
+
+            # Validar si existe el mismo numero en el cuadrado
+            for i in range(rowGroup * 3, rowGroup * 3 + 3):
+                for j in range(columnGroup * 3, columnGroup * 3 + 3):
+                    if self.sudoku[i][j] == value:
+                        return False
+            return True
+        else:
+            print("No puedes ingresar un numero en esta posicion")
+
+def fill_sudoku(self):
+    self.heuristics()
+    if len(self.queue) != 0:
+        cell = self.queue.pop()
+        for it in range(1, 10):
+            if self.validation(cell[0], cell[1], it) == True:
+                self.sudoku[cell[0]][cell[1]] = it
+                # print(it,cell[0],cell[1])
+                # print("I've found a solution")
+                break
+    else:
+        self.isSolution = True
+        return
+
+
+def insert_heuristic(self, row, column, value):
+    if self.validation(row, column, value) == True:
+        self.sudoku[row][column] = value
+        self.heuristics()
+    else:
+        print("Estas incumpliendo las reglas")
+
+
+def heuristics(self):
+    self.cellHeuristic.clear()
+    for i in range(9):
+        for j in range(9):
+            if self.sudoku[i][j] == 0:
+                self.cellHeuristic[i, j] = 1 / \
+                    self.__calculate_options__(i, j)
+    if list(self.cellHeuristic.values()) != []:
+        self.queue.append(self.hill_climbing())
+
+#Debe retornar una row y column
+def hill_climbing(self):
+
+    heuristicVals = [k for k, v in self.cellHeuristic.items()]
+    sol = max(self.cellHeuristic.values())
+
+    initialNode = heuristicVals[0]
+    #Aqui empieza hill climbing
+
+    if self.cellHeuristic[initialNode] == sol:
+        ##print("First node sol, gl!")
+        return initialNode
+    else:
+        actualNode = initialNode
+
+        while self.cellHeuristic[actualNode] != sol:
+            for i in range(1,heuristicVals.__len__()):
+                neighborNode = heuristicVals[i]
+                if self.cellHeuristic[neighborNode] == sol:
+                    ##print("Solution found")
+                    return neighborNode
+                else:
+                    if self.cellHeuristic[neighborNode] > self.cellHeuristic[actualNode]: 
+                        actualNode = neighborNode    
+                            
+def __calculate_options__(self, row, column):
+
+    options = 0
+    for it in range(9):
+        if self.sudoku[row][it] == 0:
+            options += 1
+        if self.sudoku[it][column] == 0:
+            options += 1
+
+    rowGroup = row//3
+    columnGroup = column//3
+
+    # Validar si existe el mismo numero en el cuadrado
+    for i in range(rowGroup * 3, rowGroup * 3 + 3):
+        for j in range(columnGroup * 3, columnGroup * 3 + 3):
+            if self.sudoku[i][j] == 0:
+                options += 1
+    return options
