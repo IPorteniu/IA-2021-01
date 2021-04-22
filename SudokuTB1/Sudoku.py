@@ -1,4 +1,5 @@
 from termcolor import colored
+import math
 from timeit import default_timer as timer
 import random
 import copy
@@ -141,6 +142,43 @@ class Sudoku(object):
                     estadoActual = nuevoEstado
                     score = 0
 
+    def simulated_annealing(self):
+        temperatura = 10
+        speed = 0.1
+        if self.isSolution(self.sudoku) == True:
+            print("Sudoku vino resuelto")
+            return self.sudoku
+        else:
+            estadoActual = self.sudoku
+            retries = 0
+            while temperatura > 0:
+
+                if self.isSolution(estadoActual) == True:
+                    print("Se encontró la solución")
+                    self.sudoku = estadoActual
+                    return estadoActual
+
+                nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
+                deltaE = self.evaluation(nuevoEstado) - self.evaluation(estadoActual)
+
+                #print("N° of retry: " + str(retries))    
+                #print("Temperatura: " + str(temperatura))  
+                print(self.evaluation(nuevoEstado))
+                #print("Exponencial: " + str(math.exp(-(deltaE / temperatura))))
+                #print("temperatura: " + str(round(temperatura,100)) )
+               # print("delta: " + str(deltaE))
+
+                if deltaE < 0:
+                    estadoActual = nuevoEstado
+                    retries += 1
+
+                elif random.random() < math.exp(-(deltaE / temperatura)):
+                    estadoActual = nuevoEstado
+                    retries += 1
+                temperatura = temperatura * (1-speed) 
+            print("N° of retries: " + retries)
+            self.sudoku = estadoActual
+
     def __swap_cell_values__(self, sudoku):
         # Obtenemos un row al azar
         row = random.randint(0, 8)
@@ -167,15 +205,6 @@ class Sudoku(object):
         return sudoku
 
     def isSolution(self, sudoku):
-        # points = 0
-        # for i in range(9):
-        #     for j in range(9):
-        #         if solution[i][j] == sudoku[i][j]:
-        #             points +=1
-        # if points == 81:
-        #     return True
-        # else:
-        #     return False
          validation = []
          sumaCol = 0
          sumaRow = 0
@@ -196,10 +225,6 @@ class Sudoku(object):
 
     def evaluation(self, sudoku):
         options = 0
-        # for row in range(9):
-        #     for column in range(9):
-        #         if sudoku[row][column] != solution[row][column]:
-        #             options+=1 
         for i in range(9):
             options += self.__calculate_options__(i,i,sudoku)
         return options
@@ -215,10 +240,10 @@ game.show()
 print("\n----------------SOLUCION-------------\n")
 #Inicio de hill climbing
 hcStart = timer()
-game.hill_climbing()
+game.simulated_annealing()
 game.show()
 #fin del programa
 totalEnd = timer()
 print("\nTiempo transcurrido desde el inicio de:")
 print("Programa: "+ str(totalEnd - totalStart))
-print("Hill Climbing: "+ str(totalEnd - hcStart))
+print("Simulated Annealing: "+ str(totalEnd - hcStart))
