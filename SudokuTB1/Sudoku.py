@@ -144,7 +144,7 @@ class Sudoku(object):
                 nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
                 valor1= self.evaluation(nuevoEstado)
                 valor2 =self.evaluation(estadoActual)
-                print(valor2)
+                #print(valor2)
                 if self.isSolution(nuevoEstado) == True:
                     print("Se encontró la solución")
                     self.sudoku = nuevoEstado
@@ -183,32 +183,32 @@ class Sudoku(object):
         return sudoku
 
     def isSolution(self, sudoku):
-        points = 0
-        for i in range(9):
-            for j in range(9):
-                if solution[i][j] == sudoku[i][j]:
-                    points +=1
-        if points == 81:
-            return True
-        else:
-            return False
-        # validation = []
-        # sumaCol = 0
-        # sumaRow = 0
-        # for row in range(9):
-        #     for column in range(9):
-        #         sumaCol += sudoku[column][row]
-        #         sumaRow += sudoku[row][column]
-        #     if sumaRow == 45 and sumaCol == 45:
-        #         validation.append(True)
-        #     else:
-        #         validation.append(False)
-        #     sumaCol = 0
-        #     sumaRow = 0
-
-        # if False not in validation:
+        # points = 0
+        # for i in range(9):
+        #     for j in range(9):
+        #         if solution[i][j] == sudoku[i][j]:
+        #             points +=1
+        # if points == 81:
         #     return True
-        # return False
+        # else:
+        #     return False
+         validation = []
+         sumaCol = 0
+         sumaRow = 0
+         for row in range(9):
+             for column in range(9):
+                 sumaCol += sudoku[column][row]
+                 sumaRow += sudoku[row][column]
+             if sumaRow == 45 and sumaCol == 45:
+                 validation.append(True)
+             else:
+                 validation.append(False)
+             sumaCol = 0
+             sumaRow = 0
+
+         if False not in validation:
+             return True
+         return False
 
     def evaluation(self, sudoku):
         options = 0
@@ -220,16 +220,21 @@ class Sudoku(object):
         #     options += self.__calculate_options__(i,i,sudoku)
         return options
 
-
-start = timer()
+#inicio del programa 
+totalStart = timer()
 game = Sudoku(example)
 print("\nSudoku inicial\n\n")
 game.show()
 print("\nEstado inicial\n\n")
 game.insert_row_values()
-print("----------------SOLUCION-------------")
-print(game.hill_climbing())
-end = timer()
-print(end - start)
 game.show()
-print(" ")
+print("\n----------------SOLUCION-------------\n")
+#Inicio de hill climbing
+hcStart = timer()
+game.hill_climbing()
+game.show()
+#fin del programa
+totalEnd = timer()
+print("\nTiempo transcurrido desde el inicio de:")
+print("Programa: "+ str(totalEnd - totalStart))
+print("Hill Climbing: "+ str(totalEnd - hcStart))
