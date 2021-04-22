@@ -1,11 +1,7 @@
 from termcolor import colored
 from timeit import default_timer as timer
 import random
-#n = 9
-#sudoku = [[0 for x in range(n)] for y in range(n)]
-
-# for i in range(n):
-# 	sudoku[i] = [int(x) for x in input().split()]
+import copy
 
 # Los 0 significan casillas vacias
 solution = [
@@ -19,7 +15,6 @@ solution = [
     [2, 4, 8, 9, 5, 7, 1, 3, 6],
     [7, 6, 3, 4, 1, 8, 2, 5, 9]
 ]
-
 example = [
     [0, 0, 0, 2, 6, 0, 7, 0, 1],
     [6, 8, 0, 0, 7, 0, 0, 9, 0],
@@ -48,8 +43,8 @@ class Sudoku(object):
     def __init__(self, sudoku):
         self.sudoku = sudoku
         self.cellHeuristic = {}
-        self.isSolution = False
-        self.unfixedCells = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[]}
+        self.unfixedCells = {0: [], 1: [], 2: [],
+                             3: [], 4: [], 5: [], 6: [], 7: [], 8: []}
 
     def show(self):
         for i in range(9):
@@ -82,10 +77,10 @@ class Sudoku(object):
         return set_nums.difference(set_fijos)
 
     def insert_row_values(self):
-        #Lista de numeros a insertar
+        # Lista de numeros a insertar
         num_list = []
 
-        #Iniciamos la inserción de números
+        # Iniciamos la inserción de números
         for row in range(9):
             num_list = self.__filter_row_values__(row)
 
@@ -93,20 +88,21 @@ class Sudoku(object):
                 if self.sudoku[row][column] == 0:
                     self.sudoku[row][column] = num_list.pop()
 
-    # Nuestra heurisitca dependerá de la cantidad de veces que se repite el número según las reglas del sudoku (conflictos)
     def __heuristics__(self, row, column):
-        #self.cellHeuristic.clear()
+        # Nuestra heurisitca dependerá de la cantidad de veces que se repite el número según las reglas del sudoku (conflictos)
         # Validar la cantidad de conflictos con su mismo numero
-        return 1 / self.__calculate_options__(row, column)
+        return self.__calculate_options__(row, column, self.sudoku)
 
-    def __calculate_options__(self, row, column):
-
+    def __calculate_options__(self, row, column, sudoku):
         options = 0
+        setNums = set([1, 2, 3, 4, 5, 6, 7, 8, 9])
+        setColumns = set([])
+        setSquare = set([])
 
         # Validar si existe el mismo numero en la columna
         for it in range(9):
-            if self.sudoku[it][column] == 0:
-                options += 1
+            setColumns.add(sudoku[it][column])
+        options += len(setNums - setColumns)
 
         rowGroup = row//3
         columnGroup = column//3
@@ -114,98 +110,105 @@ class Sudoku(object):
         # Validar si existe el mismo numero en el cuadrado
         for i in range(rowGroup * 3, rowGroup * 3 + 3):
             for j in range(columnGroup * 3, columnGroup * 3 + 3):
-                if self.sudoku[i][j] == 0:
-                    options += 1
+                setSquare.add(sudoku[i][j])
+        options += len(setNums - setSquare)
         return options
 
-    #Hill climbing
-    # Evaluar el estado inicial
-    # Si es un estado objetivo entonces devolverlo y parar
-    # si no ACTUAL = Inicial
-    # Mientras haya operadores aplicables a ACTUAL y no se haya encontrado solución
+    # Hill climbing
+        # Evaluar el estado inicial
+        # Si es un estado objetivo entonces devolverlo y parar
+        # si no ACTUAL = Inicial
+        # Mientras haya operadores aplicables a ACTUAL y no se haya encontrado solución
         # Seleccionar un operador no aplicado todavía a ACTUAL
         # aplicar operador y generar NUEVOESTADO
         # evaluar NUEVOESTADO
         # si es un estado objetivo entonces devolverlo y parar
-        # si no 
-            # si NUEVOESTADO es mejor que ACTUAL
-                #entonces ACTUAl = NUEVOESTADO
-            #fin si
-        #fin si
-    # fin mientras
-    #fin si
+        # si no
+        # si NUEVOESTADO es mejor que ACTUAL
+        # entonces ACTUAl = NUEVOESTADO
+        # fin si
+        # fin si
+        # fin mientras
+        # fin si
 
     def hill_climbing(self):
 
-        if self.isSolution == True:
+        if self.isSolution(self.sudoku) == True:
             print("Sudoku vino resuelto")
             return self.sudoku
         else:
             estadoActual = self.sudoku
-
-            while self.isSolution != True:
+            while self.isSolution(estadoActual) != True:
                 nuevoEstado = self.__swap_cell_values__(estadoActual)
 
-            
+                if self.isSolution(nuevoEstado) == True:
+                    print("Se encontró la solución")
+                    return nuevoEstado
 
+                elif self.evaluation(nuevoEstado) > self.evaluation(estadoActual):
+                    estadoActual = nuevoEstado
 
     def __swap_cell_values__(self, sudoku):
-        
-        row = random.randint(0,8)
-        columns = self.unfixedCells[row]
+        # Obtenemos un row al azar
+        row = random.randint(0, 8)
+        # Obtenemos todas las columnas, a traves del row, que sean intercambiables
+        columns = copy.deepcopy(self.unfixedCells[row])
+        bestHeuristic = 0
+        bestHeuristicColumn = 0
 
+        # Encontramos la mejor heuristica y en que columna se encuentra
         for column in columns:
             aux = self.__heuristics__(row, column)
+            if aux > bestHeuristic:
+                bestHeuristic = aux
+                bestHeuristicColumn = column
 
+        # Eliminamos la mejor columna de nuestra lista auxiliar
+        # para que no la tome nuevamente
+        columns.remove(bestHeuristicColumn)
 
-        
+        # Elegimos una nueva columna al azar, la cual sera semetica al SWAP
+        newCellColumn = random.choice(columns)
+        sudoku[row][bestHeuristicColumn], sudoku[row][newCellColumn] = sudoku[row][newCellColumn], sudoku[row][bestHeuristicColumn]
 
+        return sudoku
 
-        sudoku[row][columns[0]], sudoku[row][columns[1]] = sudoku[row][columns[1]], sudoku[row][columns[0]]
-
-            
-        
-
-
-
-
-
-
-
-        
-
-
-    def validation(self, row, column, value):
-            # Validar si existe el mismo numero en la fila o la columna
-            if(self.sudoku[row][column] == 0):
-                for it in range(9):
-                    if self.sudoku[row][it] == value:
-                        return False
-                    if self.sudoku[it][column] == value:
-                        return False
-
-                rowGroup = row//3
-                columnGroup = column//3
-
-                # Validar si existe el mismo numero en el cuadrado
-                for i in range(rowGroup * 3, rowGroup * 3 + 3):
-                    for j in range(columnGroup * 3, columnGroup * 3 + 3):
-                        if self.sudoku[i][j] == value:
-                            return False
-                return True
+    def isSolution(self, sudoku):
+        validation = []
+        sumaCol = 0
+        sumaRow = 0
+        for row in range(9):
+            for column in range(9):
+                sumaCol += sudoku[column][row]
+                sumaRow += sudoku[row][column]
+            if sumaRow == 45 and sumaCol == 45:
+                validation.append(True)
             else:
-                print("No puedes ingresar un numero en esta posicion")
+                validation.append(False)
+            sumaCol = 0
+            sumaRow = 0
+
+        if False not in validation:
+            return True
+        return False
+
+    def evaluation(self, sudoku):
+        options = 0
+        for row in range(9):
+            for column in range(9):
+                options += self.__calculate_options__(row, column, sudoku)
+        return options
 
 
-# start = timer()
+start = timer()
 game = Sudoku(example)
 print("\nSudoku inicial\n\n")
 game.show()
-game.insert_row_values()
-# while game.isSolution != True:
-#    game.fill_number()
-#end = timer()
-#print(end - start)
 print("\nEstado inicial\n\n")
+game.insert_row_values()
+print("----------------SOLUCION-------------")
+print(game.hill_climbing())
+end = timer()
+print(end - start)
 game.show()
 print(" ")
