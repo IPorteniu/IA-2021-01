@@ -48,9 +48,8 @@ class Sudoku(object):
     def __init__(self, sudoku):
         self.sudoku = sudoku
         self.cellHeuristic = {}
-        self.queue = []
         self.isSolution = False
-        self.fixedCells = {}
+        self.unfixedCells = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[]}
 
     def show(self):
         for i in range(9):
@@ -74,15 +73,12 @@ class Sudoku(object):
             # Condicional para hallar numeros iniciales
             if self.sudoku[row][column] != 0:
 
-                # Se añaden al diccionario de celdas fijas como True
-                self.fixedCells[row, column] = True
-
                 # Se seleccionan los numeros que faltan añadir a la fila
                 set_fijos.add(self.sudoku[row][column])
             else:
 
-                # Se añaden al diccionario de celdas fijas como False
-                self.fixedCells[row, column] = False
+                # Se añaden al diccionario de celdas no fijas como True
+                self.unfixedCells[row].append(column)
         return set_nums.difference(set_fijos)
 
     def insert_row_values(self):
@@ -91,7 +87,7 @@ class Sudoku(object):
 
         #Iniciamos la inserción de números
         for row in range(9):
-            num_list = self.filter_row_values(row)
+            num_list = self.__filter_row_values__(row)
 
             for column in range(9):
                 if self.sudoku[row][column] == 0:
@@ -101,9 +97,7 @@ class Sudoku(object):
     def __heuristics__(self, row, column):
         #self.cellHeuristic.clear()
         # Validar la cantidad de conflictos con su mismo numero
-        if self.fixedCells[row][column] == False:
-            self.cellHeuristic[row, column] = 1 / \
-                self.__calculate_options__(row, column)
+        return 1 / self.__calculate_options__(row, column)
 
     def __calculate_options__(self, row, column):
 
@@ -124,30 +118,61 @@ class Sudoku(object):
                     options += 1
         return options
 
+    #Hill climbing
+    # Evaluar el estado inicial
+    # Si es un estado objetivo entonces devolverlo y parar
+    # si no ACTUAL = Inicial
+    # Mientras haya operadores aplicables a ACTUAL y no se haya encontrado solución
+        # Seleccionar un operador no aplicado todavía a ACTUAL
+        # aplicar operador y generar NUEVOESTADO
+        # evaluar NUEVOESTADO
+        # si es un estado objetivo entonces devolverlo y parar
+        # si no 
+            # si NUEVOESTADO es mejor que ACTUAL
+                #entonces ACTUAl = NUEVOESTADO
+            #fin si
+        #fin si
+    # fin mientras
+    #fin si
+
     def hill_climbing(self):
 
-        rand = random.randint(1, 10)
-        self.sudoku[rand][rand]
-
-        #Aqui empieza hill climbing
-        if self.cellHeuristic[initialNode] == sol:
-            ##print("First node sol, gl!")
-            return initialNode
+        if self.isSolution == True:
+            print("Sudoku vino resuelto")
+            return self.sudoku
         else:
-            actualNode = initialNode
+            estadoActual = self.sudoku
 
-            while self.cellHeuristic[actualNode] != sol:
-                for i in range(1,heuristicVals.__len__()):
-                    neighborNode = heuristicVals[i]
-                    if self.cellHeuristic[neighborNode] == sol:
-                        ##print("Solution found")
-                        return neighborNode
-                    else:
-                        if self.cellHeuristic[neighborNode] > self.cellHeuristic[actualNode]: 
-                            actualNode = neighborNode    
+            while self.isSolution != True:
+                nuevoEstado = self.__swap_cell_values__(estadoActual)
 
-    def is_solution(self):
-        a=0
+            
+
+
+    def __swap_cell_values__(self, sudoku):
+        
+        row = random.randint(0,8)
+        columns = self.unfixedCells[row]
+
+        for column in columns:
+            aux = self.__heuristics__(row, column)
+
+
+        
+
+
+        sudoku[row][columns[0]], sudoku[row][columns[1]] = sudoku[row][columns[1]], sudoku[row][columns[0]]
+
+            
+        
+
+
+
+
+
+
+
+        
 
 
     def validation(self, row, column, value):
