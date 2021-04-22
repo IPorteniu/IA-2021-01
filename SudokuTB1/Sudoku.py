@@ -1,11 +1,8 @@
 from termcolor import colored
 from timeit import default_timer as timer
 import random
-#n = 9
-#sudoku = [[0 for x in range(n)] for y in range(n)]
-
-# for i in range(n):
-# 	sudoku[i] = [int(x) for x in input().split()]
+import copy
+import numpy as np
 
 # Los 0 significan casillas vacias
 solution = [
@@ -19,7 +16,6 @@ solution = [
     [2, 4, 8, 9, 5, 7, 1, 3, 6],
     [7, 6, 3, 4, 1, 8, 2, 5, 9]
 ]
-
 example = [
     [0, 0, 0, 2, 6, 0, 7, 0, 1],
     [6, 8, 0, 0, 7, 0, 0, 9, 0],
@@ -48,51 +44,8 @@ class Sudoku(object):
     def __init__(self, sudoku):
         self.sudoku = sudoku
         self.cellHeuristic = {}
-        self.queue = []
-        self.isSolution = False
-
-    def validation(self, row, column, value):
-        # Validar si existe el mismo numero en la fila o la columna
-        if(self.sudoku[row][column] == 0):
-            for it in range(9):
-                if self.sudoku[row][it] == value:
-                    return False
-                if self.sudoku[it][column] == value:
-                    return False
-
-            rowGroup = row//3
-            columnGroup = column//3
-
-            # Validar si existe el mismo numero en el cuadrado
-            for i in range(rowGroup * 3, rowGroup * 3 + 3):
-                for j in range(columnGroup * 3, columnGroup * 3 + 3):
-                    if self.sudoku[i][j] == value:
-                        return False
-            return True
-        else:
-            print("No puedes ingresar un numero en esta posicion")
-
-    def fill_number(self):
-        self.heuristics()
-        if len(self.queue) != 0:
-            cell = self.queue.pop()
-            for it in range(1, 10):
-                if self.validation(cell[0], cell[1], it) == True:
-                    self.sudoku[cell[0]][cell[1]] = it
-                    # print(it,cell[0],cell[1])
-                    # print("I've found a solution")
-                    break
-        else:
-            self.isSolution = True
-            return
-
-
-    def insert_heuristic(self, row, column, value):
-        if self.validation(row, column, value) == True:
-            self.sudoku[row][column] = value
-            self.heuristics()
-        else:
-            print("Estas incumpliendo las reglas")
+        self.unfixedCells = {0: [], 1: [], 2: [],
+                             3: [], 4: [], 5: [], 6: [], 7: [], 8: []}
 
     def show(self):
         for i in range(9):
@@ -104,69 +57,168 @@ class Sudoku(object):
             if (i+1) % 3 == 0 and i != 8:
                 print(colored("─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─", 'red'))
 
-    def heuristics(self):
-        self.cellHeuristic.clear()
-        for i in range(9):
-            for j in range(9):
-                if self.sudoku[i][j] == 0:
-                    self.cellHeuristic[i, j] = 1 / \
-                        self.__calculate_options__(i, j)
-        if list(self.cellHeuristic.values()) != []:
-            self.queue.append(self.hill_climbing())
+    def __filter_row_values__(self, row):
+        # Numeros potenciales en un Sudoku
+        set_nums = set([1, 2, 3, 4, 5, 6, 7, 8, 9])
 
-    #Debe retornar una row y column
-    def hill_climbing(self):
+        # Numeros iniciales del sudoku por fila
+        set_fijos = set([])
 
-        heuristicVals = [k for k, v in self.cellHeuristic.items()]
-        sol = max(self.cellHeuristic.values())
+        for column in range(9):
 
-        initialNode = heuristicVals[0]
-        #Aqui empieza hill climbing
+            # Condicional para hallar numeros iniciales
+            if self.sudoku[row][column] != 0:
 
-        if self.cellHeuristic[initialNode] == sol:
-            ##print("First node sol, gl!")
-            return initialNode
-        else:
-            actualNode = initialNode
+                # Se seleccionan los numeros que faltan añadir a la fila
+                set_fijos.add(self.sudoku[row][column])
+            else:
 
-            while self.cellHeuristic[actualNode] != sol:
-                for i in range(1,heuristicVals.__len__()):
-                    neighborNode = heuristicVals[i]
-                    if self.cellHeuristic[neighborNode] == sol:
-                        ##print("Solution found")
-                        return neighborNode
-                    else:
-                        if self.cellHeuristic[neighborNode] > self.cellHeuristic[actualNode]: 
-                            actualNode = neighborNode    
-                              
-    def __calculate_options__(self, row, column):
+                # Se añaden al diccionario de celdas no fijas como True
+                self.unfixedCells[row].append(column)
+        return set_nums.difference(set_fijos)
 
+    def insert_row_values(self):
+        # Lista de numeros a insertar
+        num_list = []
+
+        # Iniciamos la inserción de números
+        for row in range(9):
+            num_list = self.__filter_row_values__(row)
+
+            for column in range(9):
+                if self.sudoku[row][column] == 0:
+                    self.sudoku[row][column] = num_list.pop()
+
+    def __heuristics__(self, row, column):
+        # Nuestra heurisitca dependerá de la cantidad de veces que se repite el número según las reglas del sudoku (conflictos)
+        # Validar la cantidad de conflictos con su mismo numero
+        return self.__calculate_options__(row, column, self.sudoku)
+
+    def __calculate_options__(self, row, column, sudoku):
         options = 0
+        columnNumbers = []
+        squareNumbers = []
+        # Validar si existe el mismo numero en la columna
         for it in range(9):
-            if self.sudoku[row][it] == 0:
-                options += 1
-            if self.sudoku[it][column] == 0:
-                options += 1
-
+            columnNumbers.append(sudoku[it][column])
+        
+        options += 9 - len(np.unique(columnNumbers))    
+        
         rowGroup = row//3
         columnGroup = column//3
 
         # Validar si existe el mismo numero en el cuadrado
         for i in range(rowGroup * 3, rowGroup * 3 + 3):
             for j in range(columnGroup * 3, columnGroup * 3 + 3):
-                if self.sudoku[i][j] == 0:
-                    options += 1
+                squareNumbers.append(sudoku[i][j])
+        options += 9 - len(np.unique(squareNumbers))
         return options
 
 
-start = timer()
+    def hill_climbing(self):
+
+        if self.isSolution(self.sudoku) == True:
+            print("Sudoku vino resuelto")
+            return self.sudoku
+        else:
+            estadoActual = self.sudoku
+            score = 0
+            while self.isSolution(estadoActual) != True:
+                
+                nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
+                valor1= self.evaluation(nuevoEstado)
+                valor2 =self.evaluation(estadoActual)
+                #print(valor2)
+                if self.isSolution(nuevoEstado) == True:
+                    print("Se encontró la solución")
+                    self.sudoku = nuevoEstado
+                    return nuevoEstado
+                elif valor1 < valor2:
+                    estadoActual = nuevoEstado
+                else:
+                    score += 25
+                if score == 1000:
+                    estadoActual = nuevoEstado
+                    score = 0
+
+    def __swap_cell_values__(self, sudoku):
+        # Obtenemos un row al azar
+        row = random.randint(0, 8)
+        # Obtenemos todas las columnas, a traves del row, que sean intercambiables
+        columns = copy.deepcopy(self.unfixedCells[row])
+        bestHeuristic = 0
+        bestHeuristicColumn = 0
+
+        # Encontramos la mejor heuristica y en que columna se encuentra
+        for column in columns:
+            aux = self.__heuristics__(row, column)
+            if aux > bestHeuristic:
+                bestHeuristic = aux
+                bestHeuristicColumn = column
+
+        # Eliminamos la mejor columna de nuestra lista auxiliar
+        # para que no la tome nuevamente
+        columns.remove(bestHeuristicColumn)
+
+        # Elegimos una nueva columna al azar, la cual sera semetica al SWAP
+        newCellColumn = random.choice(columns)
+        sudoku[row][bestHeuristicColumn], sudoku[row][newCellColumn] = sudoku[row][newCellColumn], sudoku[row][bestHeuristicColumn]
+
+        return sudoku
+
+    def isSolution(self, sudoku):
+        # points = 0
+        # for i in range(9):
+        #     for j in range(9):
+        #         if solution[i][j] == sudoku[i][j]:
+        #             points +=1
+        # if points == 81:
+        #     return True
+        # else:
+        #     return False
+         validation = []
+         sumaCol = 0
+         sumaRow = 0
+         for row in range(9):
+             for column in range(9):
+                 sumaCol += sudoku[column][row]
+                 sumaRow += sudoku[row][column]
+             if sumaRow == 45 and sumaCol == 45:
+                 validation.append(True)
+             else:
+                 validation.append(False)
+             sumaCol = 0
+             sumaRow = 0
+
+         if False not in validation:
+             return True
+         return False
+
+    def evaluation(self, sudoku):
+        options = 0
+        # for row in range(9):
+        #     for column in range(9):
+        #         if sudoku[row][column] != solution[row][column]:
+        #             options+=1 
+        for i in range(9):
+            options += self.__calculate_options__(i,i,sudoku)
+        return options
+
+#inicio del programa 
+totalStart = timer()
 game = Sudoku(example)
 print("\nSudoku inicial\n\n")
 game.show()
-while game.isSolution != True:
-    game.fill_number()
-end = timer()
-print(end - start)
-print("\nSolucion\n\n")
+print("\nEstado inicial\n\n")
+game.insert_row_values()
 game.show()
-print(" ")
+print("\n----------------SOLUCION-------------\n")
+#Inicio de hill climbing
+hcStart = timer()
+game.hill_climbing()
+game.show()
+#fin del programa
+totalEnd = timer()
+print("\nTiempo transcurrido desde el inicio de:")
+print("Programa: "+ str(totalEnd - totalStart))
+print("Hill Climbing: "+ str(totalEnd - hcStart))
