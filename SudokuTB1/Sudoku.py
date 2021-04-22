@@ -50,49 +50,7 @@ class Sudoku(object):
         self.cellHeuristic = {}
         self.queue = []
         self.isSolution = False
-
-    def validation(self, row, column, value):
-        # Validar si existe el mismo numero en la fila o la columna
-        if(self.sudoku[row][column] == 0):
-            for it in range(9):
-                if self.sudoku[row][it] == value:
-                    return False
-                if self.sudoku[it][column] == value:
-                    return False
-
-            rowGroup = row//3
-            columnGroup = column//3
-
-            # Validar si existe el mismo numero en el cuadrado
-            for i in range(rowGroup * 3, rowGroup * 3 + 3):
-                for j in range(columnGroup * 3, columnGroup * 3 + 3):
-                    if self.sudoku[i][j] == value:
-                        return False
-            return True
-        else:
-            print("No puedes ingresar un numero en esta posicion")
-
-    def fill_number(self):
-        self.heuristics()
-        if len(self.queue) != 0:
-            cell = self.queue.pop()
-            for it in range(1, 10):
-                if self.validation(cell[0], cell[1], it) == True:
-                    self.sudoku[cell[0]][cell[1]] = it
-                    # print(it,cell[0],cell[1])
-                    # print("I've found a solution")
-                    break
-        else:
-            self.isSolution = True
-            return
-
-
-    def insert_heuristic(self, row, column, value):
-        if self.validation(row, column, value) == True:
-            self.sudoku[row][column] = value
-            self.heuristics()
-        else:
-            print("Estas incumpliendo las reglas")
+        self.fixedCells = {}
 
     def show(self):
         for i in range(9):
@@ -104,69 +62,54 @@ class Sudoku(object):
             if (i+1) % 3 == 0 and i != 8:
                 print(colored("─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─", 'red'))
 
-    def heuristics(self):
-        self.cellHeuristic.clear()
-        for i in range(9):
-            for j in range(9):
-                if self.sudoku[i][j] == 0:
-                    self.cellHeuristic[i, j] = 1 / \
-                        self.__calculate_options__(i, j)
-        if list(self.cellHeuristic.values()) != []:
-            self.queue.append(self.hill_climbing())
+    def filter_row_values(self, row):
+        # Numeros potenciales en un Sudoku
+        set_nums = set([1, 2, 3, 4, 5, 6, 7, 8, 9])
 
-    #Debe retornar una row y column
-    def hill_climbing(self):
+        # Numeros iniciales del sudoku por fila
+        set_fijos = set([])
 
-        heuristicVals = [k for k, v in self.cellHeuristic.items()]
-        sol = max(self.cellHeuristic.values())
+        for column in range(9):
 
-        initialNode = heuristicVals[0]
-        #Aqui empieza hill climbing
+            # Condicional para hallar numeros iniciales
+            if self.sudoku[row][column] != 0:
 
-        if self.cellHeuristic[initialNode] == sol:
-            ##print("First node sol, gl!")
-            return initialNode
-        else:
-            actualNode = initialNode
+                # Se añaden al diccionario de celdas fijas como True
+                self.fixedCells[row, column] = True
 
-            while self.cellHeuristic[actualNode] != sol:
-                for i in range(1,heuristicVals.__len__()):
-                    neighborNode = heuristicVals[i]
-                    if self.cellHeuristic[neighborNode] == sol:
-                        ##print("Solution found")
-                        return neighborNode
-                    else:
-                        if self.cellHeuristic[neighborNode] > self.cellHeuristic[actualNode]: 
-                            actualNode = neighborNode    
-                              
-    def __calculate_options__(self, row, column):
+                # Se seleccionan los numeros que faltan añadir a la fila
+                set_fijos.add(self.sudoku[row][column])
+            else:
 
-        options = 0
-        for it in range(9):
-            if self.sudoku[row][it] == 0:
-                options += 1
-            if self.sudoku[it][column] == 0:
-                options += 1
+                # Se añaden al diccionario de celdas fijas como False
+                self.fixedCells[row, column] = False
+        return set_nums.difference(set_fijos)
 
-        rowGroup = row//3
-        columnGroup = column//3
+    def insert_row_values(self):
+        #Lista de numeros a insertar
+        num_list = []
 
-        # Validar si existe el mismo numero en el cuadrado
-        for i in range(rowGroup * 3, rowGroup * 3 + 3):
-            for j in range(columnGroup * 3, columnGroup * 3 + 3):
-                if self.sudoku[i][j] == 0:
-                    options += 1
-        return options
+        #Iniciamos la inserción de números
+        for row in range(9):
+            num_list = self.filter_row_values(row)
+
+            for column in range(9):
+                if self.sudoku[row][column] == 0:
+                    self.sudoku[row][column] = num_list.pop()
 
 
-start = timer()
+
+
+
+#start = timer()
 game = Sudoku(example)
 print("\nSudoku inicial\n\n")
 game.show()
-while game.isSolution != True:
-    game.fill_number()
-end = timer()
-print(end - start)
-print("\nSolucion\n\n")
+game.insert_row_values()
+# while game.isSolution != True:
+#    game.fill_number()
+#end = timer()
+#print(end - start)
+print("\nEstado inicial\n\n")
 game.show()
 print(" ")
