@@ -2,6 +2,7 @@ from termcolor import colored
 from timeit import default_timer as timer
 import random
 import copy
+import numpy as np
 
 # Los 0 significan casillas vacias
 solution = [
@@ -95,19 +96,22 @@ class Sudoku(object):
 
     def __calculate_options__(self, row, column, sudoku):
         options = 0
+        columnNumbers = []
+        squareNumbers = []
         # Validar si existe el mismo numero en la columna
         for it in range(9):
-            if sudoku[it][column] != solution[it][column]:
-                options += 1
-
+            columnNumbers.append(sudoku[it][column])
+        
+        options += 9 - len(np.unique(columnNumbers))    
+        
         rowGroup = row//3
         columnGroup = column//3
 
         # Validar si existe el mismo numero en el cuadrado
         for i in range(rowGroup * 3, rowGroup * 3 + 3):
             for j in range(columnGroup * 3, columnGroup * 3 + 3):
-               if sudoku[i][j] != solution [i][j]:
-                   options += 1
+                squareNumbers.append(sudoku[i][j])
+        options += 9 - len(np.unique(squareNumbers))
         return options
 
     # Hill climbing
@@ -134,16 +138,24 @@ class Sudoku(object):
             return self.sudoku
         else:
             estadoActual = self.sudoku
+            score = 0
             while self.isSolution(estadoActual) != True:
                 
                 nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
                 valor1= self.evaluation(nuevoEstado)
                 valor2 =self.evaluation(estadoActual)
+                print(valor2)
                 if self.isSolution(nuevoEstado) == True:
                     print("Se encontró la solución")
+                    self.sudoku = nuevoEstado
                     return nuevoEstado
                 elif valor1 < valor2:
                     estadoActual = nuevoEstado
+                else:
+                    score += 25
+                if score == 1000:
+                    estadoActual = nuevoEstado
+                    score = 0
 
     def __swap_cell_values__(self, sudoku):
         # Obtenemos un row al azar
@@ -171,23 +183,32 @@ class Sudoku(object):
         return sudoku
 
     def isSolution(self, sudoku):
-        validation = []
-        sumaCol = 0
-        sumaRow = 0
-        for row in range(9):
-            for column in range(9):
-                sumaCol += sudoku[column][row]
-                sumaRow += sudoku[row][column]
-            if sumaRow == 45 and sumaCol == 45:
-                validation.append(True)
-            else:
-                validation.append(False)
-            sumaCol = 0
-            sumaRow = 0
-
-        if False not in validation:
+        points = 0
+        for i in range(9):
+            for j in range(9):
+                if solution[i][j] == sudoku[i][j]:
+                    points +=1
+        if points == 81:
             return True
-        return False
+        else:
+            return False
+        # validation = []
+        # sumaCol = 0
+        # sumaRow = 0
+        # for row in range(9):
+        #     for column in range(9):
+        #         sumaCol += sudoku[column][row]
+        #         sumaRow += sudoku[row][column]
+        #     if sumaRow == 45 and sumaCol == 45:
+        #         validation.append(True)
+        #     else:
+        #         validation.append(False)
+        #     sumaCol = 0
+        #     sumaRow = 0
+
+        # if False not in validation:
+        #     return True
+        # return False
 
     def evaluation(self, sudoku):
         options = 0
@@ -195,6 +216,8 @@ class Sudoku(object):
             for column in range(9):
                 if sudoku[row][column] != solution[row][column]:
                     options+=1 
+        # for i in range(9):
+        #     options += self.__calculate_options__(i,i,sudoku)
         return options
 
 
