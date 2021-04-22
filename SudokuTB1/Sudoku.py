@@ -95,14 +95,10 @@ class Sudoku(object):
 
     def __calculate_options__(self, row, column, sudoku):
         options = 0
-        setNums = set([1, 2, 3, 4, 5, 6, 7, 8, 9])
-        setColumns = set([])
-        setSquare = set([])
-
         # Validar si existe el mismo numero en la columna
         for it in range(9):
-            setColumns.add(sudoku[it][column])
-        options += len(setNums - setColumns)
+            if sudoku[it][column] != solution[it][column]:
+                options += 1
 
         rowGroup = row//3
         columnGroup = column//3
@@ -110,8 +106,8 @@ class Sudoku(object):
         # Validar si existe el mismo numero en el cuadrado
         for i in range(rowGroup * 3, rowGroup * 3 + 3):
             for j in range(columnGroup * 3, columnGroup * 3 + 3):
-                setSquare.add(sudoku[i][j])
-        options += len(setNums - setSquare)
+               if sudoku[i][j] != solution [i][j]:
+                   options += 1
         return options
 
     # Hill climbing
@@ -139,13 +135,14 @@ class Sudoku(object):
         else:
             estadoActual = self.sudoku
             while self.isSolution(estadoActual) != True:
-                nuevoEstado = self.__swap_cell_values__(estadoActual)
-
+                
+                nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
+                valor1= self.evaluation(nuevoEstado)
+                valor2 =self.evaluation(estadoActual)
                 if self.isSolution(nuevoEstado) == True:
                     print("Se encontró la solución")
                     return nuevoEstado
-
-                elif self.evaluation(nuevoEstado) > self.evaluation(estadoActual):
+                elif valor1 < valor2:
                     estadoActual = nuevoEstado
 
     def __swap_cell_values__(self, sudoku):
@@ -196,7 +193,8 @@ class Sudoku(object):
         options = 0
         for row in range(9):
             for column in range(9):
-                options += self.__calculate_options__(row, column, sudoku)
+                if sudoku[row][column] != solution[row][column]:
+                    options+=1 
         return options
 
 
