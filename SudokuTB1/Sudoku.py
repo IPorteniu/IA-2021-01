@@ -62,7 +62,7 @@ class Sudoku(object):
             if (i+1) % 3 == 0 and i != 8:
                 print(colored("─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─", 'red'))
 
-    def filter_row_values(self, row):
+    def __filter_row_values__(self, row):
         # Numeros potenciales en un Sudoku
         set_nums = set([1, 2, 3, 4, 5, 6, 7, 8, 9])
 
@@ -97,11 +97,82 @@ class Sudoku(object):
                 if self.sudoku[row][column] == 0:
                     self.sudoku[row][column] = num_list.pop()
 
+    # Nuestra heurisitca dependerá de la cantidad de veces que se repite el número según las reglas del sudoku (conflictos)
+    def __heuristics__(self, row, column):
+        #self.cellHeuristic.clear()
+        # Validar la cantidad de conflictos con su mismo numero
+        if self.fixedCells[row][column] == False:
+            self.cellHeuristic[row, column] = 1 / \
+                self.__calculate_options__(row, column)
+
+    def __calculate_options__(self, row, column):
+
+        options = 0
+
+        # Validar si existe el mismo numero en la columna
+        for it in range(9):
+            if self.sudoku[it][column] == 0:
+                options += 1
+
+        rowGroup = row//3
+        columnGroup = column//3
+
+        # Validar si existe el mismo numero en el cuadrado
+        for i in range(rowGroup * 3, rowGroup * 3 + 3):
+            for j in range(columnGroup * 3, columnGroup * 3 + 3):
+                if self.sudoku[i][j] == 0:
+                    options += 1
+        return options
+
+    def hill_climbing(self):
+
+        rand = random.randint(1, 10)
+        self.sudoku[rand][rand]
+
+        #Aqui empieza hill climbing
+        if self.cellHeuristic[initialNode] == sol:
+            ##print("First node sol, gl!")
+            return initialNode
+        else:
+            actualNode = initialNode
+
+            while self.cellHeuristic[actualNode] != sol:
+                for i in range(1,heuristicVals.__len__()):
+                    neighborNode = heuristicVals[i]
+                    if self.cellHeuristic[neighborNode] == sol:
+                        ##print("Solution found")
+                        return neighborNode
+                    else:
+                        if self.cellHeuristic[neighborNode] > self.cellHeuristic[actualNode]: 
+                            actualNode = neighborNode    
+
+    def is_solution(self):
+        a=0
 
 
+    def validation(self, row, column, value):
+            # Validar si existe el mismo numero en la fila o la columna
+            if(self.sudoku[row][column] == 0):
+                for it in range(9):
+                    if self.sudoku[row][it] == value:
+                        return False
+                    if self.sudoku[it][column] == value:
+                        return False
+
+                rowGroup = row//3
+                columnGroup = column//3
+
+                # Validar si existe el mismo numero en el cuadrado
+                for i in range(rowGroup * 3, rowGroup * 3 + 3):
+                    for j in range(columnGroup * 3, columnGroup * 3 + 3):
+                        if self.sudoku[i][j] == value:
+                            return False
+                return True
+            else:
+                print("No puedes ingresar un numero en esta posicion")
 
 
-#start = timer()
+# start = timer()
 game = Sudoku(example)
 print("\nSudoku inicial\n\n")
 game.show()
