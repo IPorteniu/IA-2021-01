@@ -114,22 +114,6 @@ class Sudoku(object):
         options += 9 - len(np.unique(squareNumbers))
         return options
 
-    # Hill climbing
-        # Evaluar el estado inicial
-        # Si es un estado objetivo entonces devolverlo y parar
-        # si no ACTUAL = Inicial
-        # Mientras haya operadores aplicables a ACTUAL y no se haya encontrado solución
-        # Seleccionar un operador no aplicado todavía a ACTUAL
-        # aplicar operador y generar NUEVOESTADO
-        # evaluar NUEVOESTADO
-        # si es un estado objetivo entonces devolverlo y parar
-        # si no
-        # si NUEVOESTADO es mejor que ACTUAL
-        # entonces ACTUAl = NUEVOESTADO
-        # fin si
-        # fin si
-        # fin mientras
-        # fin si
 
     def hill_climbing(self):
 
@@ -212,12 +196,12 @@ class Sudoku(object):
 
     def evaluation(self, sudoku):
         options = 0
-        for row in range(9):
-            for column in range(9):
-                if sudoku[row][column] != solution[row][column]:
-                    options+=1 
-        # for i in range(9):
-        #     options += self.__calculate_options__(i,i,sudoku)
+        # for row in range(9):
+        #     for column in range(9):
+        #         if sudoku[row][column] != solution[row][column]:
+        #             options+=1 
+        for i in range(9):
+            options += self.__calculate_options__(i,i,sudoku)
         return options
 
 #inicio del programa 
