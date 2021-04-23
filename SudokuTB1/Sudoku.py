@@ -93,7 +93,7 @@ class Sudoku(object):
     def __heuristics__(self, row, column):
         # Nuestra heurisitca dependerá de la cantidad de veces que se repite el número según las reglas del sudoku (conflictos)
         # Validar la cantidad de conflictos con su mismo numero
-        return  self.__calculate_options__(row, column, self.sudoku)
+        return self.__calculate_options__(row, column, self.sudoku)
 
     def __calculate_options__(self, row, column, sudoku):
         options = 0
@@ -117,6 +117,7 @@ class Sudoku(object):
 
 
     def hill_climbing(self):
+        
 
         if self.isSolution(self.sudoku) == True:
             print("Sudoku vino resuelto")
@@ -124,33 +125,48 @@ class Sudoku(object):
         else:
             estadoActual = self.sudoku
             score = 0
+            minHeuristica = 100
+
             while self.isSolution(estadoActual) != True:
                 
                 nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
-                valor1= self.evaluation(nuevoEstado)
-                valor2 =self.evaluation(estadoActual)
-                #print(valor2)
+                nuevaHeuristica = self.evaluation(nuevoEstado)
+                actualHeuristica =self.evaluation(estadoActual)
+                if nuevaHeuristica < minHeuristica:
+                    minHeuristica = nuevaHeuristica 
+
+                print("\nHeuristica Actual: " + str(actualHeuristica))
+                print("Nueva Heuristica: " + str(nuevaHeuristica))
+                print("Minima Heuristica: " + str(minHeuristica))
+                
+
                 if self.isSolution(nuevoEstado) == True:
                     print("Se encontró la solución")
                     self.sudoku = nuevoEstado
                     return nuevoEstado
-                elif valor1 < valor2:
+                    
+                elif nuevaHeuristica < actualHeuristica:
                     estadoActual = nuevoEstado
+
                 else:
                     score += 25
+
                 if score == 1000:
                     estadoActual = nuevoEstado
                     score = 0
 
     def simulated_annealing(self):
         temperatura = 1
-        speed = 0.01
+        speed = 0.99
+        stuckCount = 0
         if self.isSolution(self.sudoku) == True:
             print("Sudoku vino resuelto")
             return self.sudoku
         else:
             estadoActual = self.sudoku
             retries = 0
+            minHeuristica = 100
+
             while temperatura > 0:
 
                 if self.isSolution(estadoActual) == True:
@@ -161,22 +177,34 @@ class Sudoku(object):
                 nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
                 actualHeuristica = self.evaluation(estadoActual)
                 nuevaHeuristica = self.evaluation(nuevoEstado)
+                if nuevaHeuristica < minHeuristica:
+                    minHeuristica = nuevaHeuristica 
 
                 deltaE = nuevaHeuristica - actualHeuristica
 
                 print("\nN° of retry: " + str(retries))    
                 #print("Temperatura: " + str(temperatura))  
-                print("Heuristica Actual: " + str(self.evaluation(estadoActual)))
-                print("Nueva Heuristica: " + str(self.evaluation(nuevoEstado)))
+                print("Heuristica Actual: " + str(actualHeuristica))
+                print("Nueva Heuristica: " + str(nuevaHeuristica))
+                print("Minima Heuristica: " + str(minHeuristica))
                 #print("Exponencial: " + str(math.exp(-(deltaE / temperatura))))
-                #print("temperatura: " + str(round(temperatura,100)) )
                 #print("delta: " + str(deltaE))
 
                 if self.__funcion_aceptacion__(deltaE,temperatura):
                     estadoActual = nuevoEstado
+    
+                temperatura *= speed
+
+                if actualHeuristica < nuevaHeuristica:
+                      stuckCount += 1
+                else:
+                    stuckCount = 0
+
+                if (stuckCount > 50):
+                    temperatura += .5
 
                 retries += 1
-                temperatura = temperatura * (1-speed) 
+               
 
             print("N° of retries: " + str(retries))
             self.sudoku = estadoActual
@@ -209,6 +237,7 @@ class Sudoku(object):
         columns.remove(bestHeuristicColumn)
 
         # Elegimos una nueva columna al azar, la cual sera semetica al SWAP
+        
         newCellColumn = random.choice(columns)
         sudoku[row][bestHeuristicColumn], sudoku[row][newCellColumn] = sudoku[row][newCellColumn], sudoku[row][bestHeuristicColumn]
 
@@ -237,6 +266,10 @@ class Sudoku(object):
         options = 0
         for i in range(9):
             options += self.__calculate_options__(i,i,sudoku)
+        # for row in range(9):
+        #     for column in range(9):
+        #         if sudoku[row][column] != solution[row][column]:
+        #             options+=1
         return options
 
 #inicio del programa 
@@ -250,8 +283,8 @@ game.show()
 print("\n----------------SOLUCION-------------\n")
 #Inicio de hill climbing
 hcStart = timer()
-#game.simulated_annealing()
-game.hill_climbing()
+game.simulated_annealing()
+#game.hill_climbing()
 game.show()
 #fin del programa
 totalEnd = timer()
