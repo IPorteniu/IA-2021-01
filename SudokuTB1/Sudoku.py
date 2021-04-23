@@ -4,7 +4,6 @@ import random
 import copy
 import numpy as np
 
-# Los 0 significan casillas vacias
 solution = [
     [4, 3, 5, 2, 6, 9, 7, 8, 1],
     [6, 8, 2, 5, 7, 1, 4, 9, 3],
@@ -16,30 +15,6 @@ solution = [
     [2, 4, 8, 9, 5, 7, 1, 3, 6],
     [7, 6, 3, 4, 1, 8, 2, 5, 9]
 ]
-example = [
-    [0, 0, 0, 2, 6, 0, 7, 0, 1],
-    [6, 8, 0, 0, 7, 0, 0, 9, 0],
-    [1, 9, 0, 0, 0, 4, 5, 0, 0],
-    [8, 2, 0, 1, 0, 0, 0, 4, 0],
-    [0, 0, 4, 6, 0, 2, 9, 0, 0],
-    [0, 5, 0, 0, 0, 3, 0, 2, 8],
-    [0, 0, 9, 3, 0, 0, 0, 7, 4],
-    [0, 4, 0, 0, 5, 0, 0, 3, 6],
-    [7, 0, 3, 0, 1, 8, 0, 0, 0]
-]
-example2 = [
-    [6, 0, 7, 9, 0, 0, 2, 0, 3],
-    [9, 0, 3, 4, 2, 0, 8, 6, 0],
-    [0, 0, 0, 0, 8, 3, 0, 0, 1],
-    [5, 3, 0, 0, 6, 0, 9, 0, 2],
-    [0, 0, 0, 0, 0, 0, 0, 3, 7],
-    [4, 0, 0, 1, 3, 2, 5, 0, 0],
-    [0, 4, 0, 0, 7, 0, 6, 0, 9],
-    [7, 2, 0, 0, 0, 0, 0, 0, 0],
-    [8, 9, 1, 2, 5, 0, 0, 7, 0]
-]
-
-
 class Sudoku(object):
     def __init__(self, sudoku):
         self.sudoku = sudoku
@@ -90,7 +65,8 @@ class Sudoku(object):
                     self.sudoku[row][column] = num_list.pop()
 
     def __heuristics__(self, row, column):
-        # Nuestra heurisitca dependerá de la cantidad de veces que se repite el número según las reglas del sudoku (conflictos)
+        # Nuestra heurisitca dependerá de la cantidad de veces que se
+        # repite el número según las reglas del sudoku (conflictos)
         # Validar la cantidad de conflictos con su mismo numero
         return self.__calculate_options__(row, column, self.sudoku)
 
@@ -101,9 +77,7 @@ class Sudoku(object):
         # Validar si existe el mismo numero en la columna
         for it in range(9):
             columnNumbers.append(sudoku[it][column])
-        
-        options += 9 - len(np.unique(columnNumbers))    
-        
+        options += 9 - len(np.unique(columnNumbers))
         rowGroup = row//3
         columnGroup = column//3
 
@@ -114,7 +88,6 @@ class Sudoku(object):
         options += 9 - len(np.unique(squareNumbers))
         return options
 
-
     def hill_climbing(self):
 
         if self.isSolution(self.sudoku) == True:
@@ -124,7 +97,6 @@ class Sudoku(object):
             estadoActual = self.sudoku
             score = 0
             while self.isSolution(estadoActual) != True:
-                
                 nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
                 valor1= self.evaluation(nuevoEstado)
                 valor2 =self.evaluation(estadoActual)
@@ -162,63 +134,61 @@ class Sudoku(object):
 
         # Elegimos una nueva columna al azar, la cual sera semetica al SWAP
         newCellColumn = random.choice(columns)
-        sudoku[row][bestHeuristicColumn], sudoku[row][newCellColumn] = sudoku[row][newCellColumn], sudoku[row][bestHeuristicColumn]
+        sudoku[row][bestHeuristicColumn], sudoku[row][newCellColumn] = \
+        sudoku[row][newCellColumn], sudoku[row][bestHeuristicColumn]
 
         return sudoku
 
     def isSolution(self, sudoku):
-        # points = 0
-        # for i in range(9):
-        #     for j in range(9):
-        #         if solution[i][j] == sudoku[i][j]:
-        #             points +=1
-        # if points == 81:
-        #     return True
-        # else:
-        #     return False
-         validation = []
-         sumaCol = 0
-         sumaRow = 0
-         for row in range(9):
-             for column in range(9):
-                 sumaCol += sudoku[column][row]
-                 sumaRow += sudoku[row][column]
-             if sumaRow == 45 and sumaCol == 45:
-                 validation.append(True)
-             else:
-                 validation.append(False)
-             sumaCol = 0
-             sumaRow = 0
+        validation = []
+        sumaCol = 0
+        sumaRow = 0
+        for row in range(9):
+            for column in range(9):
+                sumaCol += sudoku[column][row]
+                sumaRow += sudoku[row][column]
+            if sumaRow == 45 and sumaCol == 45:
+                validation.append(True)
+            else:
+                validation.append(False)
+            sumaCol = 0
+            sumaRow = 0
 
-         if False not in validation:
-             return True
-         return False
+        if False not in validation:
+            return True
+        return False
+
+    def __evaluate_column__(self,column, sudoku):
+        options = 0
+        columnNumbers = []
+        for it in range(9):
+            columnNumbers.append(sudoku[it][column])
+        options += 9 - len(np.unique(columnNumbers))
+        return options
+    def __evaluate_square__(self,row,column,sudoku):
+        options = 0
+        squareNumbers = []
+
+        rowGroup = row//3
+        columnGroup = column//3
+
+        # Validar si existe el mismo numero en el cuadrado
+        for i in range(rowGroup * 3, rowGroup * 3 + 3):
+            for j in range(columnGroup * 3, columnGroup * 3 + 3):
+                squareNumbers.append(sudoku[i][j])
+        options += 9 - len(np.unique(squareNumbers))
+        return options
 
     def evaluation(self, sudoku):
         options = 0
+        start = timer()
         # for row in range(9):
         #     for column in range(9):
         #         if sudoku[row][column] != solution[row][column]:
-        #             options+=1 
+        #             options+=1
         for i in range(9):
             options += self.__calculate_options__(i,i,sudoku)
+        end = timer()
+        print(end-start)
         return options
 
-#inicio del programa 
-totalStart = timer()
-game = Sudoku(example)
-print("\nSudoku inicial\n\n")
-game.show()
-print("\nEstado inicial\n\n")
-game.insert_row_values()
-game.show()
-print("\n----------------SOLUCION-------------\n")
-#Inicio de hill climbing
-hcStart = timer()
-game.hill_climbing()
-game.show()
-#fin del programa
-totalEnd = timer()
-print("\nTiempo transcurrido desde el inicio de:")
-print("Programa: "+ str(totalEnd - totalStart))
-print("Hill Climbing: "+ str(totalEnd - hcStart))
