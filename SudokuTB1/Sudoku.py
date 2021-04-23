@@ -156,8 +156,8 @@ class Sudoku(object):
                     score = 0
 
     def simulated_annealing(self):
-        temperatura = 1
-        speed = 0.99
+        temperatura = 100
+        speed = 0.0001
         stuckCount = 0
         if self.isSolution(self.sudoku) == True:
             print("Sudoku vino resuelto")
@@ -167,14 +167,15 @@ class Sudoku(object):
             retries = 0
             minHeuristica = 100
 
-            while temperatura > 0:
+            while temperatura < 1:
+
+                nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
 
                 if self.isSolution(estadoActual) == True:
                     print("Se encontró la solución")
                     self.sudoku = estadoActual
                     return estadoActual
 
-                nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
                 actualHeuristica = self.evaluation(estadoActual)
                 nuevaHeuristica = self.evaluation(nuevoEstado)
                 if nuevaHeuristica < minHeuristica:
@@ -183,25 +184,25 @@ class Sudoku(object):
                 deltaE = nuevaHeuristica - actualHeuristica
 
                 print("\nN° of retry: " + str(retries))    
-                #print("Temperatura: " + str(temperatura))  
+                print("\nTemperatura: " + str(temperatura))  
                 print("Heuristica Actual: " + str(actualHeuristica))
                 print("Nueva Heuristica: " + str(nuevaHeuristica))
-                print("Minima Heuristica: " + str(minHeuristica))
-                #print("Exponencial: " + str(math.exp(-(deltaE / temperatura))))
-                #print("delta: " + str(deltaE))
+                print("delta: " + str(deltaE))
+                print("Exponencial(e^(-delta/t)): " + str(math.exp(-(deltaE / temperatura))))
+                print("\nMinima Heuristica: " + str(minHeuristica))
 
                 if self.__funcion_aceptacion__(deltaE,temperatura):
                     estadoActual = nuevoEstado
     
-                temperatura *= speed
+                temperatura *= (1-speed)
 
-                if actualHeuristica < nuevaHeuristica:
-                      stuckCount += 1
-                else:
-                    stuckCount = 0
+                # if actualHeuristica < nuevaHeuristica:
+                #       stuckCount += 1
+                # else:
+                #     stuckCount = 0
 
-                if (stuckCount > 50):
-                    temperatura += .5
+                # if (stuckCount > 20):
+                #     temperatura += .5
 
                 retries += 1
                
@@ -210,9 +211,11 @@ class Sudoku(object):
             self.sudoku = estadoActual
 
     def __funcion_aceptacion__(self, deltaE, temperatura):
+        boltzmann = math.exp(-(deltaE*10 / temperatura))
+        rand = random.random()
         if deltaE < 0:
             return True
-        elif random.random() <= math.exp(-(deltaE / temperatura)):
+        elif  rand <= boltzmann:
             return True
         return False
 
@@ -222,24 +225,23 @@ class Sudoku(object):
         row = random.randint(0, 8)
         # Obtenemos todas las columnas, a traves del row, que sean intercambiables
         columns = copy.deepcopy(self.unfixedCells[row])
-        bestHeuristic = 0
-        bestHeuristicColumn = 0
+        worstHeuristic = 0
+        worstHeuristicColumn = 0
 
-        # Encontramos la mejor heuristica y en que columna se encuentra
+        # Encontramos la mayor heuristica y en que columna se encuentra
         for column in columns:
             aux = self.__heuristics__(row, column)
-            if aux > bestHeuristic:
-                bestHeuristic = aux
-                bestHeuristicColumn = column
+            if aux > worstHeuristic:
+                worstHeuristic = aux
+                worstHeuristicColumn = column
 
         # Eliminamos la mejor columna de nuestra lista auxiliar
         # para que no la tome nuevamente
-        columns.remove(bestHeuristicColumn)
-
-        # Elegimos una nueva columna al azar, la cual sera semetica al SWAP
+        columns.remove(worstHeuristicColumn)
         
+        # Elegimos una nueva columna al azar, la cual sera semetica al SWAP
         newCellColumn = random.choice(columns)
-        sudoku[row][bestHeuristicColumn], sudoku[row][newCellColumn] = sudoku[row][newCellColumn], sudoku[row][bestHeuristicColumn]
+        sudoku[row][worstHeuristicColumn], sudoku[row][newCellColumn] = sudoku[row][newCellColumn], sudoku[row][worstHeuristicColumn]
 
         return sudoku
 
