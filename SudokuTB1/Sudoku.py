@@ -93,7 +93,7 @@ class Sudoku(object):
     def __heuristics__(self, row, column):
         # Nuestra heurisitca dependerá de la cantidad de veces que se repite el número según las reglas del sudoku (conflictos)
         # Validar la cantidad de conflictos con su mismo numero
-        return self.__calculate_options__(row, column, self.sudoku)
+        return  self.__calculate_options__(row, column, self.sudoku)
 
     def __calculate_options__(self, row, column, sudoku):
         options = 0
@@ -143,8 +143,8 @@ class Sudoku(object):
                     score = 0
 
     def simulated_annealing(self):
-        temperatura = 10
-        speed = 0.1
+        temperatura = 1
+        speed = 0.01
         if self.isSolution(self.sudoku) == True:
             print("Sudoku vino resuelto")
             return self.sudoku
@@ -159,25 +159,35 @@ class Sudoku(object):
                     return estadoActual
 
                 nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
-                deltaE = self.evaluation(nuevoEstado) - self.evaluation(estadoActual)
+                actualHeuristica = self.evaluation(estadoActual)
+                nuevaHeuristica = self.evaluation(nuevoEstado)
 
-                #print("N° of retry: " + str(retries))    
+                deltaE = nuevaHeuristica - actualHeuristica
+
+                print("\nN° of retry: " + str(retries))    
                 #print("Temperatura: " + str(temperatura))  
-                print(self.evaluation(nuevoEstado))
+                print("Heuristica Actual: " + str(self.evaluation(estadoActual)))
+                print("Nueva Heuristica: " + str(self.evaluation(nuevoEstado)))
                 #print("Exponencial: " + str(math.exp(-(deltaE / temperatura))))
                 #print("temperatura: " + str(round(temperatura,100)) )
-               # print("delta: " + str(deltaE))
+                #print("delta: " + str(deltaE))
 
-                if deltaE < 0:
+                if self.__funcion_aceptacion__(deltaE,temperatura):
                     estadoActual = nuevoEstado
-                    retries += 1
 
-                elif random.random() < math.exp(-(deltaE / temperatura)):
-                    estadoActual = nuevoEstado
-                    retries += 1
+                retries += 1
                 temperatura = temperatura * (1-speed) 
-            print("N° of retries: " + retries)
+
+            print("N° of retries: " + str(retries))
             self.sudoku = estadoActual
+
+    def __funcion_aceptacion__(self, deltaE, temperatura):
+        if deltaE < 0:
+            return True
+        elif random.random() <= math.exp(-(deltaE / temperatura)):
+            return True
+        return False
+
 
     def __swap_cell_values__(self, sudoku):
         # Obtenemos un row al azar
@@ -240,7 +250,8 @@ game.show()
 print("\n----------------SOLUCION-------------\n")
 #Inicio de hill climbing
 hcStart = timer()
-game.simulated_annealing()
+#game.simulated_annealing()
+game.hill_climbing()
 game.show()
 #fin del programa
 totalEnd = timer()
