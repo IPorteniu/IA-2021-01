@@ -4,6 +4,7 @@ from timeit import default_timer as timer
 import random
 import copy
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Los 0 significan casillas vacias
 solution = [
@@ -117,7 +118,11 @@ class Sudoku(object):
 
 
     def hill_climbing(self):
-        
+
+        plt.axis([0, 100, 0, 80])
+        plt.ylabel("Heuristica")
+        plt.xlabel("Temperatura")
+        plt.title("Hill Climbing")
 
         if self.isSolution(self.sudoku) == True:
             print("Sudoku vino resuelto")
@@ -126,8 +131,12 @@ class Sudoku(object):
             estadoActual = self.sudoku
             score = 0
             minHeuristica = 100
+            inc = 0
 
             while self.isSolution(estadoActual) != True:
+
+                plt.scatter(inc, self.evaluation(estadoActual))
+                plt.pause(0.01)
                 
                 nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
                 nuevaHeuristica = self.evaluation(nuevoEstado)
@@ -138,6 +147,7 @@ class Sudoku(object):
                 print("\nHeuristica Actual: " + str(actualHeuristica))
                 print("Nueva Heuristica: " + str(nuevaHeuristica))
                 print("Minima Heuristica: " + str(minHeuristica))
+                inc +=1
                 
 
                 if self.isSolution(nuevoEstado) == True:
@@ -157,8 +167,11 @@ class Sudoku(object):
 
     def simulated_annealing(self):
         temperatura = 100
-        speed = 0.0001
+        speed = 0.001
         stuckCount = 0
+        plt.ylabel("Heuristica")
+        plt.xlabel("Temperatura")
+        plt.title("Simulated Annealing")
         if self.isSolution(self.sudoku) == True:
             print("Sudoku vino resuelto")
             return self.sudoku
@@ -167,9 +180,13 @@ class Sudoku(object):
             retries = 0
             minHeuristica = 100
 
-            while temperatura < 1:
-
+            while temperatura > 1:
+        
                 nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
+
+                plt.scatter(temperatura, self.evaluation(estadoActual))
+                plt.pause(0.0001)
+
 
                 if self.isSolution(estadoActual) == True:
                     print("Se encontró la solución")
@@ -206,7 +223,6 @@ class Sudoku(object):
 
                 retries += 1
                
-
             print("N° of retries: " + str(retries))
             self.sudoku = estadoActual
 
