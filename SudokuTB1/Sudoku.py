@@ -115,7 +115,7 @@ class Sudoku(object):
 
     def hill_climbing(self):
 
-        plt.axis([0, 100, 0, 80])
+        plt.axis([0, 50, 0, 80])
         plt.ylabel("Heuristica")
         plt.xlabel("Iteracion")
         plt.title("Hill Climbing")
@@ -130,9 +130,11 @@ class Sudoku(object):
             inc = 0
 
             while self.isSolution(estadoActual) != True:
-
-                plt.scatter(inc, self.evaluation(estadoActual))
-                plt.pause(0.01)
+                
+                if inc % 1250 == 0:
+                    
+                    plt.scatter(inc/1250, self.evaluation(estadoActual))
+                    plt.pause(0.00000000000001)
                 
                 nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
                 nuevaHeuristica = self.evaluation(nuevoEstado)
@@ -148,6 +150,7 @@ class Sudoku(object):
 
                 if self.isSolution(nuevoEstado) == True:
                     print("Se encontró la solución")
+                    print(inc)
                     self.sudoku = nuevoEstado
                     return nuevoEstado
                     

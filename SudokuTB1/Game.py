@@ -1,7 +1,6 @@
 import pygame
 from Sudoku import Sudoku
 from timeit import default_timer as timer
-
 # Los 0 significan casillas vacias
 solution = [
     [4, 3, 5, 2, 6, 9, 7, 8, 1],
@@ -89,7 +88,12 @@ def key_stroke(sudoku, window):
                     print(end-start)
                     
                 if event.key == 50:
-                    # Usamos Hill Climbing con restart
+                    window.fill(backgroundColor)
+                    draw_lines(window)
+                    start = timer()
+                    draw_values(sudoku.simulated_annealing(),window)
+                    end = timer()
+                    print(end-start)
                     return None
                 if event.key == 51:
                     return None
@@ -118,17 +122,4 @@ def start():
     draw_values(sudoku.sudoku,window)
     key_stroke(sudoku, window)
 
-
-
 start()
-#inicio del programa
-
-#fin del programa
-#sudoku.show()
-#Inicio de hill climbing
-# hcStart = timer()
-# totalStart = timer()
-# totalEnd = timer()
-# print("\nTiempo transcurrido desde el inicio de:")
-# print("Programa: "+ str(totalEnd - totalStart))
-# print("Hill Climbing: "+ str(totalEnd - hcStart))
