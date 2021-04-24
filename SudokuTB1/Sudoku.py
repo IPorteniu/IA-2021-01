@@ -192,3 +192,22 @@ class Sudoku(object):
         print(end-start)
         return options
 
+# #inicio del programa 
+# totalStart = timer()
+# game = Sudoku(example)
+# print("\nSudoku inicial\n\n")
+# game.show()
+# print("\nEstado inicial\n\n")
+# game.insert_row_values()
+# game.show()
+# print("\n----------------SOLUCION-------------\n")
+# #Inicio de hill climbing
+# hcStart = timer()
+# #game.simulated_annealing()
+# game.hill_climbing()
+# game.show()
+# #fin del programa
+# totalEnd = timer()
+# print("\nTiempo transcurrido desde el inicio de:")
+# print("Programa: "+ str(totalEnd - totalStart))
+# print("Simulated Annealing: "+ str(totalEnd - hcStart))
