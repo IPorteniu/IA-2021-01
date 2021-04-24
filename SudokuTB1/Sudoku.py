@@ -6,7 +6,6 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Los 0 significan casillas vacias
 solution = [
     [4, 3, 5, 2, 6, 9, 7, 8, 1],
     [6, 8, 2, 5, 7, 1, 4, 9, 3],
@@ -18,30 +17,6 @@ solution = [
     [2, 4, 8, 9, 5, 7, 1, 3, 6],
     [7, 6, 3, 4, 1, 8, 2, 5, 9]
 ]
-example = [
-    [0, 0, 0, 2, 6, 0, 7, 0, 1],
-    [6, 8, 0, 0, 7, 0, 0, 9, 0],
-    [1, 9, 0, 0, 0, 4, 5, 0, 0],
-    [8, 2, 0, 1, 0, 0, 0, 4, 0],
-    [0, 0, 4, 6, 0, 2, 9, 0, 0],
-    [0, 5, 0, 0, 0, 3, 0, 2, 8],
-    [0, 0, 9, 3, 0, 0, 0, 7, 4],
-    [0, 4, 0, 0, 5, 0, 0, 3, 6],
-    [7, 0, 3, 0, 1, 8, 0, 0, 0]
-]
-example2 = [
-    [6, 0, 7, 9, 0, 0, 2, 0, 3],
-    [9, 0, 3, 4, 2, 0, 8, 6, 0],
-    [0, 0, 0, 0, 8, 3, 0, 0, 1],
-    [5, 3, 0, 0, 6, 0, 9, 0, 2],
-    [0, 0, 0, 0, 0, 0, 0, 3, 7],
-    [4, 0, 0, 1, 3, 2, 5, 0, 0],
-    [0, 4, 0, 0, 7, 0, 6, 0, 9],
-    [7, 2, 0, 0, 0, 0, 0, 0, 0],
-    [8, 9, 1, 2, 5, 0, 0, 7, 0]
-]
-
-
 class Sudoku(object):
     def __init__(self, sudoku):
         self.sudoku = sudoku
@@ -92,7 +67,8 @@ class Sudoku(object):
                     self.sudoku[row][column] = num_list.pop()
 
     def __heuristics__(self, row, column):
-        # Nuestra heurisitca dependerá de la cantidad de veces que se repite el número según las reglas del sudoku (conflictos)
+        # Nuestra heurisitca dependerá de la cantidad de veces que se
+        # repite el número según las reglas del sudoku (conflictos)
         # Validar la cantidad de conflictos con su mismo numero
         return self.__calculate_options__(row, column, self.sudoku)
 
@@ -103,9 +79,7 @@ class Sudoku(object):
         # Validar si existe el mismo numero en la columna
         for it in range(9):
             columnNumbers.append(sudoku[it][column])
-        
-        options += 9 - len(np.unique(columnNumbers))    
-        
+        options += 9 - len(np.unique(columnNumbers))
         rowGroup = row//3
         columnGroup = column//3
 
@@ -115,7 +89,6 @@ class Sudoku(object):
                 squareNumbers.append(sudoku[i][j])
         options += 9 - len(np.unique(squareNumbers))
         return options
-
 
     def hill_climbing(self):
 
@@ -257,11 +230,13 @@ class Sudoku(object):
         
         # Elegimos una nueva columna al azar, la cual sera semetica al SWAP
         newCellColumn = random.choice(columns)
+        
         sudoku[row][worstHeuristicColumn], sudoku[row][newCellColumn] = sudoku[row][newCellColumn], sudoku[row][worstHeuristicColumn]
 
         return sudoku
 
     def isSolution(self, sudoku):
+
          validation = []
          sumaCol = 0
          sumaRow = 0
@@ -284,10 +259,6 @@ class Sudoku(object):
         options = 0
         for i in range(9):
             options += self.__calculate_options__(i,i,sudoku)
-        # for row in range(9):
-        #     for column in range(9):
-        #         if sudoku[row][column] != solution[row][column]:
-        #             options+=1
         return options
 
 #inicio del programa 
@@ -309,3 +280,4 @@ totalEnd = timer()
 print("\nTiempo transcurrido desde el inicio de:")
 print("Programa: "+ str(totalEnd - totalStart))
 print("Simulated Annealing: "+ str(totalEnd - hcStart))
+
