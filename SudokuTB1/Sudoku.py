@@ -184,9 +184,9 @@ class Sudoku(object):
             while temperatura > 1:
         
                 nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
-
+                
                 plt.scatter(temperatura, self.evaluation(estadoActual))
-                plt.pause(0.0001)
+                plt.pause(0.0000000001)
 
 
                 if self.isSolution(estadoActual) == True:
@@ -226,7 +226,7 @@ class Sudoku(object):
                
             print("N° of retries: " + str(retries))
             self.sudoku = estadoActual
-
+        return estadoActual
     def __funcion_aceptacion__(self, deltaE, temperatura):
         boltzmann = math.exp(-(deltaE*10 / temperatura))
         rand = random.random()
@@ -235,7 +235,6 @@ class Sudoku(object):
         elif  rand <= boltzmann:
             return True
         return False
-
 
     def __swap_cell_values__(self, sudoku):
         # Obtenemos un row al azar
@@ -265,23 +264,22 @@ class Sudoku(object):
 
     def isSolution(self, sudoku):
 
-         validation = []
-         sumaCol = 0
-         sumaRow = 0
-         for row in range(9):
-             for column in range(9):
-                 sumaCol += sudoku[column][row]
-                 sumaRow += sudoku[row][column]
-             if sumaRow == 45 and sumaCol == 45:
-                 validation.append(True)
-             else:
-                 validation.append(False)
-             sumaCol = 0
-             sumaRow = 0
-
-         if False not in validation:
-             return True
-         return False
+        validation = []
+        sumaCol = 0
+        sumaRow = 0
+        for row in range(9):
+            for column in range(9):
+                sumaCol += sudoku[column][row]
+                sumaRow += sudoku[row][column]
+            if sumaRow == 45 and sumaCol == 45:
+                validation.append(True)
+            else:
+                validation.append(False)
+            sumaCol = 0
+            sumaRow = 0
+        if False not in validation:
+            return True
+        return False
 
     def evaluation(self, sudoku):
         options = 0

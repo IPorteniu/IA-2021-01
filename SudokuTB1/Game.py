@@ -60,16 +60,10 @@ def draw_menu(window):
     first_rect.center = (120,600)
     window.blit(first,first_rect)
     # Segundo texto render
-    second = myFont.render('2.- HillClimbing con Restart',True,numbersColor)
+    second = myFont.render('2.- Demostración Simulated Annealing',True,numbersColor)
     second_rect = second.get_rect()
-    second_rect.center = (120,620)
+    second_rect.center = (140,620)
     window.blit(second,second_rect)
-    # Tercer texto render
-    third = myFont.render('3.- Simulated Annealing ',True,numbersColor)
-    third_rect = third.get_rect()
-    third_rect.center = (120,640)
-    window.blit(third,third_rect)
-
     pygame.display.update()
 
 def key_stroke(sudoku, window):
@@ -94,10 +88,6 @@ def key_stroke(sudoku, window):
                     draw_values(sudoku.simulated_annealing(),window)
                     end = timer()
                     print(end-start)
-                    return None
-                if event.key == 51:
-                    return None
-                    # Usamos Simulated Annealing
 
 def start():
     example = [
@@ -109,8 +99,7 @@ def start():
     [0, 5, 0, 0, 0, 3, 0, 2, 8],
     [0, 0, 9, 3, 0, 0, 0, 7, 4],
     [0, 4, 0, 0, 5, 0, 0, 3, 6],
-    [7, 0, 3, 0, 1, 8, 0, 0, 0]
-]
+    [7, 0, 3, 0, 1, 8, 0, 0, 0]]
     pygame.init()
     window = pygame.display.set_mode((WIDTH, WIDTH))
     pygame.display.set_caption("Sudoku")
