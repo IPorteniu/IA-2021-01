@@ -285,24 +285,3 @@ class Sudoku(object):
         for i in range(9):
             options += self.__calculate_options__(i,i,sudoku)
         return options
-
-#inicio del programa 
-total_start = timer()
-game = Sudoku(example)
-print("\nSudoku inicial\n\n")
-game.show()
-print("\nEstado inicial\n\n")
-game.insert_row_values()
-game.show()
-print("\n----------------SOLUCION-------------\n")
-#Inicio de Hill Climbing o Simulated Annealing
-algoritmo_start = timer()
-#game.simulated_annealing()
-game.hill_climbing()
-game.show()
-#fin del programa
-totalEnd = timer()
-print("\nTiempo transcurrido desde el inicio de:")
-print("Programa: "+ str(totalEnd - total_start))
-print("Simulated Annealing: "+ str(totalEnd - algoritmo_start))
-
