@@ -17,6 +17,29 @@ solution = [
     [2, 4, 8, 9, 5, 7, 1, 3, 6],
     [7, 6, 3, 4, 1, 8, 2, 5, 9]
 ]
+example = [
+    [0, 0, 0, 2, 6, 0, 7, 0, 1],
+    [6, 8, 0, 0, 7, 0, 0, 9, 0],
+    [1, 9, 0, 0, 0, 4, 5, 0, 0],
+    [8, 2, 0, 1, 0, 0, 0, 4, 0],
+    [0, 0, 4, 6, 0, 2, 9, 0, 0],
+    [0, 5, 0, 0, 0, 3, 0, 2, 8],
+    [0, 0, 9, 3, 0, 0, 0, 7, 4],
+    [0, 4, 0, 0, 5, 0, 0, 3, 6],
+    [7, 0, 3, 0, 1, 8, 0, 0, 0]
+]
+example2 = [
+    [6, 0, 7, 9, 0, 0, 2, 0, 3],
+    [9, 0, 3, 4, 2, 0, 8, 6, 0],
+    [0, 0, 0, 0, 8, 3, 0, 0, 1],
+    [5, 3, 0, 0, 6, 0, 9, 0, 2],
+    [0, 0, 0, 0, 0, 0, 0, 3, 7],
+    [4, 0, 0, 1, 3, 2, 5, 0, 0],
+    [0, 4, 0, 0, 7, 0, 6, 0, 9],
+    [7, 2, 0, 0, 0, 0, 0, 0, 0],
+    [8, 9, 1, 2, 5, 0, 0, 7, 0]
+]
+
 class Sudoku(object):
     def __init__(self, sudoku):
         self.sudoku = sudoku
@@ -94,7 +117,7 @@ class Sudoku(object):
 
         plt.axis([0, 100, 0, 80])
         plt.ylabel("Heuristica")
-        plt.xlabel("Temperatura")
+        plt.xlabel("Iteracion")
         plt.title("Hill Climbing")
 
         if self.isSolution(self.sudoku) == True:
@@ -139,12 +162,14 @@ class Sudoku(object):
                     score = 0
 
     def simulated_annealing(self):
+
         temperatura = 100
         speed = 0.001
         stuckCount = 0
         plt.ylabel("Heuristica")
         plt.xlabel("Temperatura")
         plt.title("Simulated Annealing")
+
         if self.isSolution(self.sudoku) == True:
             print("Sudoku vino resuelto")
             return self.sudoku
@@ -262,7 +287,7 @@ class Sudoku(object):
         return options
 
 #inicio del programa 
-totalStart = timer()
+total_start = timer()
 game = Sudoku(example)
 print("\nSudoku inicial\n\n")
 game.show()
@@ -270,14 +295,14 @@ print("\nEstado inicial\n\n")
 game.insert_row_values()
 game.show()
 print("\n----------------SOLUCION-------------\n")
-#Inicio de hill climbing
-hcStart = timer()
-game.simulated_annealing()
-#game.hill_climbing()
+#Inicio de Hill Climbing o Simulated Annealing
+algoritmo_start = timer()
+#game.simulated_annealing()
+game.hill_climbing()
 game.show()
 #fin del programa
 totalEnd = timer()
 print("\nTiempo transcurrido desde el inicio de:")
-print("Programa: "+ str(totalEnd - totalStart))
-print("Simulated Annealing: "+ str(totalEnd - hcStart))
+print("Programa: "+ str(totalEnd - total_start))
+print("Simulated Annealing: "+ str(totalEnd - algoritmo_start))
 
