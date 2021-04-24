@@ -1,5 +1,6 @@
 import pygame
-from Sudoku import *
+from Sudoku import Sudoku
+from timeit import default_timer as timer
 
 # Los 0 significan casillas vacias
 solution = [
