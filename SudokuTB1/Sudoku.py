@@ -210,7 +210,7 @@ class Sudoku(object):
 
     # Función donde se valida el cambio de estados para el SA
     def __acceptance_function__(self, delta_e, temperature):
-        #Multiplicamos el delta de energía * 10 para que los resultados de boltzmann sean más precisos
+        # Multiplicamos el delta de energía * 10 para que los resultados de boltzmann sean más precisos
         boltzmann = math.exp(-(delta_e *10 / temperature))
         rand = random.random()
         if delta_e < 0:
