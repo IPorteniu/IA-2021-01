@@ -18,7 +18,7 @@ class Sudoku(object):
         set_nums = set([1, 2, 3, 4, 5, 6, 7, 8, 9])
 
         # Numeros iniciales del sudoku por fila
-        set_fijos = set([])
+        set_fixed = set([])
 
         for column in range(9):
 
@@ -26,12 +26,12 @@ class Sudoku(object):
             if self.sudoku[row][column] != 0:
 
                 # Se seleccionan los numeros que faltan añadir a la fila
-                set_fijos.add(self.sudoku[row][column])
+                set_fixed.add(self.sudoku[row][column])
             else:
 
                 # Se añaden al diccionario de celdas no fijas como True
                 self.unfixed_cells[row].append(column)
-        return set_nums.difference(set_fijos)
+        return set_nums.difference(set_fixed)
 
     def insert_row_values(self):
         # Lista de numeros a insertar
@@ -83,63 +83,63 @@ class Sudoku(object):
         else:
 
             #Se asigna el estado actual a una variable
-            estado_actual = self.sudoku
+            current_state = self.sudoku
             # Utilidades de info
             score = 0
-            min_heuristica = 100
+            min_heuristic = 100
             inc = 0
 
-            while self.is_solution(estado_actual) != True:
+            while self.is_solution(current_state) != True:
 
                 #Utilidades de la gráfica
                 if inc % 1250 == 0:
                     
-                    plt.scatter(inc/1250, self.evaluation(estado_actual))
+                    plt.scatter(inc/1250, self.evaluation(current_state))
                     plt.pause(0.00000000000001)
                 
                 # Se selecciona al vecino a comparar
-                nuevo_estado = self.__swap_cell_values__(copy.deepcopy(estado_actual))
+                new_state = self.__swap_cell_values__(copy.deepcopy(current_state))
                 # Se calculan las heurísticas
-                nueva_heuristica = self.evaluation(nuevo_estado)
-                actual_heuristica =self.evaluation(estado_actual)
+                new_heuristic = self.evaluation(new_state)
+                current_heuristic =self.evaluation(current_state)
                 # Se comparan las heurísticas
-                if nueva_heuristica < min_heuristica:
-                    min_heuristica = nueva_heuristica 
+                if new_heuristic < min_heuristic:
+                    min_heuristic = new_heuristic 
                 
                 #Utilidades de info
-                print("\nHeuristica Actual: " + str(actual_heuristica))
-                print("Nueva Heuristica: " + str(nueva_heuristica))
-                print("Minima Heuristica: " + str(min_heuristica))
+                print("\nHeuristica Actual: " + str(current_heuristic))
+                print("Nueva Heuristica: " + str(new_heuristic))
+                print("Minima Heuristica: " + str(min_heuristic))
                 inc +=1
                 
                 # Condición de victoría por si el nuevo estado(o vecino) es la solución
-                if self.is_solution(nuevo_estado) == True:
+                if self.is_solution(new_state) == True:
                     print("Se encontró la solución")
                     print(inc)
-                    self.sudoku = nuevo_estado
-                    return nuevo_estado
+                    self.sudoku = new_state
+                    return new_state
 
                 # Si la heurísitca del vecino es mejor que la actual se intercambian    
-                elif nueva_heuristica < actual_heuristica:
-                    estado_actual = nuevo_estado
+                elif new_heuristic < current_heuristic:
+                    current_state = new_state
 
                 # Técnica de random restart para no atascarse en un mínimo local
                 else:
                     score += 25
 
                 if score == 1000:
-                    estado_actual = nuevo_estado
+                    current_state = new_state
                     score = 0
 
     # Definición de Simulated Annealing(SA)
     def simulated_annealing(self):
 
         # Variables necesarias para SA
-        temperatura = 100
+        temperature = 100
         speed = 0.003
         # Variable usada en técnica utilizada más abajo
         # stuckCount = 0 
-        min_heuristica = 100
+        min_heuristic = 100
         # Utilidades de la gráfica
         plt.ylabel("Heuristica")
         plt.xlabel("Temperatura")
@@ -151,66 +151,66 @@ class Sudoku(object):
             return self.sudoku
         else:
             # Se asigna el estado actual a una variable
-            estado_actual = self.sudoku
+            current_state = self.sudoku
             # Contador de veces iterado
             retries = 0
             # Condición de fin si es que no encuentra una solución
-            while temperatura > 0.001:
+            while temperature > 0.001:
                 # Se selecciona al vecino a comparar
-                nuevo_estado = self.__swap_cell_values__(copy.deepcopy(estado_actual))
+                new_state = self.__swap_cell_values__(copy.deepcopy(current_state))
                 # Utilidades de la gráfica 
-                plt.scatter(temperatura, self.evaluation(estado_actual))
+                plt.scatter(temperature, self.evaluation(current_state))
                 plt.pause(0.1)
 
                 # Condición de fin si es que el estado actual es la solución
-                if self.is_solution(estado_actual) == True:
+                if self.is_solution(current_state) == True:
                     print("Se encontró la solución")
-                    self.sudoku = estado_actual
-                    return estado_actual
+                    self.sudoku = current_state
+                    return current_state
 
                 # Se halla la energía de ambos estados 
-                actual_heuristica = self.evaluation(estado_actual)
-                nueva_heuristica = self.evaluation(nuevo_estado)
+                current_heuristic = self.evaluation(current_state)
+                new_heuristic = self.evaluation(new_state)
                 # Utilidad para reconocer la mayor heuristica lograda
-                if nueva_heuristica < min_heuristica:
-                    min_heuristica = nueva_heuristica 
+                if new_heuristic < min_heuristic:
+                    min_heuristic = new_heuristic 
                 # Se halla el delta de energía
-                delta_e = nueva_heuristica - actual_heuristica
+                delta_e = new_heuristic - current_heuristic
 
                 # Utilidades para información 
                 print("\nN° of retry: " + str(retries))    
-                print("\nTemperatura: " + str(temperatura))  
-                print("Heuristica Actual: " + str(actual_heuristica))
-                print("Nueva Heuristica: " + str(nueva_heuristica))
-                print("Minima Heuristica: " + str(min_heuristica))
+                print("\ntemperature: " + str(temperature))  
+                print("Heuristica Actual: " + str(current_heuristic))
+                print("Nueva Heuristica: " + str(new_heuristic))
+                print("Minima Heuristica: " + str(min_heuristic))
                 print("delta: " + str(delta_e))
-                print("\nExponencial(e^(-delta/t)): " + str(math.exp(-(delta_e / temperatura))))
+                print("\nExponencial(e^(-delta/t)): " + str(math.exp(-(delta_e / temperature))))
              
                 # Función de aceptación
-                if self.__funcion_aceptacion__(delta_e,temperatura):
-                    estado_actual = nuevo_estado
+                if self.__acceptance_function__(delta_e,temperature):
+                    current_state = new_state
                 
-                # Cambio de temperatura segun su factor de enfriamiento
-                temperatura *= (1-speed)
+                # Cambio de temperature segun su factor de enfriamiento
+                temperature *= (1-speed)
                 retries += 1
 
-                # Técnica de aumento de temperatura para evitar minimos locales
-                # if nueva_heuristica >= actual_heuristica:
+                # Técnica de aumento de temperature para evitar minimos locales
+                # if new_heuristic >= current_heuristic:
                 #     stuckCount += 1
                 # else:
                 #     stuckCount = 0
 
                 # if (stuckCount > 50):
-                #     temperatura += 2
+                #     temperature += 2
 
-            # Se devuelve el último estado en caso se termina de enfriar la temperatura   
+            # Se devuelve el último estado en caso se termina de enfriar la temperature   
             print("N° of retries: " + str(retries))
-            self.sudoku = estado_actual
-        return estado_actual
+            self.sudoku = current_state
+        return current_state
 
     # Función donde se valida el cambio de estados para el SA
-    def __funcion_aceptacion__(self, delta_e, temperatura):
-        boltzmann = math.exp(-(delta_e *10 / temperatura))
+    def __acceptance_function__(self, delta_e, temperature):
+        boltzmann = math.exp(-(delta_e *10 / temperature))
         rand = random.random()
         if delta_e < 0:
             return True
@@ -251,18 +251,18 @@ class Sudoku(object):
         
         # La suma de filas y la de columnas del sudoku deberán retornar 45(1+2+3+4+5+6+7+8+9)
         validation = []
-        suma_col = 0
-        suma_row = 0
+        column_sum = 0
+        row_sum = 0
         for row in range(9):
             for column in range(9):
-                suma_col += sudoku[column][row]
-                suma_row += sudoku[row][column]
-            if suma_row == 45 and suma_col == 45:
+                column_sum += sudoku[column][row]
+                row_sum += sudoku[row][column]
+            if row_sum == 45 and column_sum == 45:
                 validation.append(True)
             else:
                 validation.append(False)
-            suma_col = 0
-            suma_row = 0
+            column_sum = 0
+            row_sum = 0
         if False not in validation:
             return True
         return False
