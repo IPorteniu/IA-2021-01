@@ -1,68 +1,24 @@
 from termcolor import colored
+import math
 from timeit import default_timer as timer
 import random
 import copy
 import numpy as np
-
-# Los 0 significan casillas vacias
-solution = [
-    [4, 3, 5, 2, 6, 9, 7, 8, 1],
-    [6, 8, 2, 5, 7, 1, 4, 9, 3],
-    [1, 9, 7, 8, 3, 4, 5, 6, 2],
-    [8, 2, 6, 1, 9, 5, 3, 4, 7],
-    [3, 7, 4, 6, 8, 2, 9, 1, 5],
-    [9, 5, 1, 7, 4, 3, 6, 2, 8],
-    [5, 1, 9, 3, 2, 6, 8, 7, 4],
-    [2, 4, 8, 9, 5, 7, 1, 3, 6],
-    [7, 6, 3, 4, 1, 8, 2, 5, 9]
-]
-example = [
-    [0, 0, 0, 2, 6, 0, 7, 0, 1],
-    [6, 8, 0, 0, 7, 0, 0, 9, 0],
-    [1, 9, 0, 0, 0, 4, 5, 0, 0],
-    [8, 2, 0, 1, 0, 0, 0, 4, 0],
-    [0, 0, 4, 6, 0, 2, 9, 0, 0],
-    [0, 5, 0, 0, 0, 3, 0, 2, 8],
-    [0, 0, 9, 3, 0, 0, 0, 7, 4],
-    [0, 4, 0, 0, 5, 0, 0, 3, 6],
-    [7, 0, 3, 0, 1, 8, 0, 0, 0]
-]
-example2 = [
-    [6, 0, 7, 9, 0, 0, 2, 0, 3],
-    [9, 0, 3, 4, 2, 0, 8, 6, 0],
-    [0, 0, 0, 0, 8, 3, 0, 0, 1],
-    [5, 3, 0, 0, 6, 0, 9, 0, 2],
-    [0, 0, 0, 0, 0, 0, 0, 3, 7],
-    [4, 0, 0, 1, 3, 2, 5, 0, 0],
-    [0, 4, 0, 0, 7, 0, 6, 0, 9],
-    [7, 2, 0, 0, 0, 0, 0, 0, 0],
-    [8, 9, 1, 2, 5, 0, 0, 7, 0]
-]
-
+import matplotlib.pyplot as plt
 
 class Sudoku(object):
     def __init__(self, sudoku):
         self.sudoku = sudoku
-        self.cellHeuristic = {}
-        self.unfixedCells = {0: [], 1: [], 2: [],
+        self.cell_heuristic = {}
+        self.unfixed_cells = {0: [], 1: [], 2: [],
                              3: [], 4: [], 5: [], 6: [], 7: [], 8: []}
-
-    def show(self):
-        for i in range(9):
-            mamadisimo = str(self.sudoku[i]).replace(
-                "[", "").replace("]", "").replace(",", "")
-            mamadisimo = mamadisimo[:5] + " | " + \
-                mamadisimo[6:11] + " | " + mamadisimo[12:]
-            print(mamadisimo)
-            if (i+1) % 3 == 0 and i != 8:
-                print(colored("─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─", 'red'))
 
     def __filter_row_values__(self, row):
         # Numeros potenciales en un Sudoku
         set_nums = set([1, 2, 3, 4, 5, 6, 7, 8, 9])
 
         # Numeros iniciales del sudoku por fila
-        set_fijos = set([])
+        set_fixed = set([])
 
         for column in range(9):
 
@@ -70,12 +26,12 @@ class Sudoku(object):
             if self.sudoku[row][column] != 0:
 
                 # Se seleccionan los numeros que faltan añadir a la fila
-                set_fijos.add(self.sudoku[row][column])
+                set_fixed.add(self.sudoku[row][column])
             else:
 
                 # Se añaden al diccionario de celdas no fijas como True
-                self.unfixedCells[row].append(column)
-        return set_nums.difference(set_fijos)
+                self.unfixed_cells[row].append(column)
+        return set_nums.difference(set_fixed)
 
     def insert_row_values(self):
         # Lista de numeros a insertar
@@ -90,135 +46,231 @@ class Sudoku(object):
                     self.sudoku[row][column] = num_list.pop()
 
     def __heuristics__(self, row, column):
-        # Nuestra heurisitca dependerá de la cantidad de veces que se repite el número según las reglas del sudoku (conflictos)
+        # Nuestra heurisitca dependerá de la cantidad de veces que se
+        # repite el número según las reglas del sudoku (conflictos)
         # Validar la cantidad de conflictos con su mismo numero
         return self.__calculate_options__(row, column, self.sudoku)
 
     def __calculate_options__(self, row, column, sudoku):
         options = 0
-        columnNumbers = []
-        squareNumbers = []
+        column_numbers = []
+        square_numbers = []
         # Validar si existe el mismo numero en la columna
         for it in range(9):
-            columnNumbers.append(sudoku[it][column])
-        
-        options += 9 - len(np.unique(columnNumbers))    
-        
-        rowGroup = row//3
-        columnGroup = column//3
+            column_numbers.append(sudoku[it][column])
+        options += 9 - len(np.unique(column_numbers))
+        row_group = row//3
+        column_group = column//3
 
         # Validar si existe el mismo numero en el cuadrado
-        for i in range(rowGroup * 3, rowGroup * 3 + 3):
-            for j in range(columnGroup * 3, columnGroup * 3 + 3):
-                squareNumbers.append(sudoku[i][j])
-        options += 9 - len(np.unique(squareNumbers))
+        for i in range(row_group * 3, row_group * 3 + 3):
+            for j in range(column_group * 3, column_group * 3 + 3):
+                square_numbers.append(sudoku[i][j])
+        options += 9 - len(np.unique(square_numbers))
         return options
-
 
     def hill_climbing(self):
 
-        if self.isSolution(self.sudoku) == True:
+        # Utilidades de la gráfica
+        plt.ylabel("Heuristica")
+        plt.xlabel("Iteracion")
+        plt.title("Hill Climbing")
+
+         # Condición por si el primer estado es la solución
+        if self.is_solution(self.sudoku) == True:
             print("Sudoku vino resuelto")
             return self.sudoku
         else:
-            estadoActual = self.sudoku
+
+            #Se asigna el estado actual a una variable
+            current_state = self.sudoku
+            # Utilidades de info
             score = 0
-            while self.isSolution(estadoActual) != True:
+            min_heuristic = 100
+            inc = 0
+
+            while self.is_solution(current_state) != True:
+
+                #Utilidades de la gráfica
+                if inc % 1250 == 0:
+                    
+                    plt.scatter(inc/1250, self.evaluation(current_state))
+                    plt.pause(0.00000000000001)
                 
-                nuevoEstado = self.__swap_cell_values__(copy.deepcopy(estadoActual))
-                valor1= self.evaluation(nuevoEstado)
-                valor2 =self.evaluation(estadoActual)
-                #print(valor2)
-                if self.isSolution(nuevoEstado) == True:
+                # Se selecciona al vecino a comparar
+                new_state = self.__swap_cell_values__(copy.deepcopy(current_state))
+                # Se calculan las heurísticas
+                new_heuristic = self.evaluation(new_state)
+                current_heuristic =self.evaluation(current_state)
+                # Se comparan las heurísticas
+                if new_heuristic < min_heuristic:
+                    min_heuristic = new_heuristic 
+                
+                #Utilidades de info
+                print("\nHeuristica Actual: " + str(current_heuristic))
+                print("Nueva Heuristica: " + str(new_heuristic))
+                print("Minima Heuristica: " + str(min_heuristic))
+                inc +=1
+                
+                # Condición de victoría por si el nuevo estado(o vecino) es la solución
+                if self.is_solution(new_state) == True:
                     print("Se encontró la solución")
-                    self.sudoku = nuevoEstado
-                    return nuevoEstado
-                elif valor1 < valor2:
-                    estadoActual = nuevoEstado
+                    print(inc)
+                    self.sudoku = new_state
+                    return new_state
+
+                # Si la heurísitca del vecino es mejor que la actual se intercambian    
+                elif new_heuristic < current_heuristic:
+                    current_state = new_state
+
+                # Técnica de random restart para no atascarse en un mínimo local
                 else:
                     score += 25
+
                 if score == 1000:
-                    estadoActual = nuevoEstado
+                    current_state = new_state
                     score = 0
 
+    # Definición de Simulated Annealing(SA)
+    def simulated_annealing(self):
+
+        # Variables necesarias para SA
+        temperature = 100
+        speed = 0.003
+        # Variable usada en técnica utilizada más abajo
+        # stuckCount = 0 
+        min_heuristic = 100
+        # Utilidades de la gráfica
+        plt.ylabel("Heuristica")
+        plt.xlabel("Temperatura")
+        plt.title("Simulated Annealing")
+
+        # Condición por si el primer estado es la solución
+        if self.is_solution(self.sudoku) == True:
+            print("Sudoku vino resuelto")
+            return self.sudoku
+        else:
+            # Se asigna el estado actual a una variable
+            current_state = self.sudoku
+            # Contador de veces iterado
+            retries = 0
+            # Condición de fin si es que no encuentra una solución
+            while temperature > 0.001:
+                # Se selecciona al vecino a comparar
+                new_state = self.__swap_cell_values__(copy.deepcopy(current_state))
+                # Utilidades de la gráfica 
+                plt.scatter(temperature, self.evaluation(current_state))
+                plt.pause(0.1)
+
+                # Condición de fin si es que el estado actual es la solución
+                if self.is_solution(current_state) == True:
+                    print("Se encontró la solución")
+                    self.sudoku = current_state
+                    return current_state
+
+                # Se halla la energía de ambos estados 
+                current_heuristic = self.evaluation(current_state)
+                new_heuristic = self.evaluation(new_state)
+                # Utilidad para reconocer la mayor heuristica lograda
+                if new_heuristic < min_heuristic:
+                    min_heuristic = new_heuristic 
+                # Se halla el delta de energía
+                delta_e = new_heuristic - current_heuristic
+
+                # Utilidades para información 
+                print("\nN° of retry: " + str(retries))    
+                print("\ntemperature: " + str(temperature))  
+                print("Heuristica Actual: " + str(current_heuristic))
+                print("Nueva Heuristica: " + str(new_heuristic))
+                print("Minima Heuristica: " + str(min_heuristic))
+                print("delta: " + str(delta_e))
+                print("\nExponencial(e^(-delta/t)): " + str(math.exp(-(delta_e / temperature))))
+             
+                # Función de aceptación
+                if self.__acceptance_function__(delta_e,temperature):
+                    current_state = new_state
+                
+                # Cambio de temperature segun su factor de enfriamiento
+                temperature *= (1-speed)
+                retries += 1
+
+                # Técnica de aumento de temperature para evitar minimos locales
+                # if new_heuristic >= current_heuristic:
+                #     stuckCount += 1
+                # else:
+                #     stuckCount = 0
+
+                # if (stuckCount > 50):
+                #     temperature += 2
+
+            # Se devuelve el último estado en caso se termina de enfriar la temperature   
+            print("N° of retries: " + str(retries))
+            self.sudoku = current_state
+        return current_state
+
+    # Función donde se valida el cambio de estados para el SA
+    def __acceptance_function__(self, delta_e, temperature):
+        # Multiplicamos el delta de energía * 10 para que los resultados de boltzmann sean más precisos
+        boltzmann = math.exp(-(delta_e *10 / temperature))
+        rand = random.random()
+        if delta_e < 0:
+            return True
+        elif  rand <= boltzmann:
+            return True
+        return False
+
+    # Función para cambiar la celda con peor heurística por otra de manera aleatoria
     def __swap_cell_values__(self, sudoku):
         # Obtenemos un row al azar
         row = random.randint(0, 8)
         # Obtenemos todas las columnas, a traves del row, que sean intercambiables
-        columns = copy.deepcopy(self.unfixedCells[row])
-        bestHeuristic = 0
-        bestHeuristicColumn = 0
+        columns = copy.deepcopy(self.unfixed_cells[row])
+        worst_heuristic = 0
+        worst_heuristic_column = 0
 
-        # Encontramos la mejor heuristica y en que columna se encuentra
+        # Encontramos la mayor heuristica y en que columna se encuentra
         for column in columns:
             aux = self.__heuristics__(row, column)
-            if aux > bestHeuristic:
-                bestHeuristic = aux
-                bestHeuristicColumn = column
+            if aux > worst_heuristic:
+                worst_heuristic = aux
+                worst_heuristic_column = column
 
         # Eliminamos la mejor columna de nuestra lista auxiliar
         # para que no la tome nuevamente
-        columns.remove(bestHeuristicColumn)
-
+        columns.remove(worst_heuristic_column)
+        
         # Elegimos una nueva columna al azar, la cual sera semetica al SWAP
-        newCellColumn = random.choice(columns)
-        sudoku[row][bestHeuristicColumn], sudoku[row][newCellColumn] = sudoku[row][newCellColumn], sudoku[row][bestHeuristicColumn]
+        new_cell_column = random.choice(columns)
+        
+        # Se efectúa el cambio de celdas
+        sudoku[row][worst_heuristic_column], sudoku[row][new_cell_column] = sudoku[row][new_cell_column], sudoku[row][worst_heuristic_column]
 
         return sudoku
 
-    def isSolution(self, sudoku):
-        # points = 0
-        # for i in range(9):
-        #     for j in range(9):
-        #         if solution[i][j] == sudoku[i][j]:
-        #             points +=1
-        # if points == 81:
-        #     return True
-        # else:
-        #     return False
-         validation = []
-         sumaCol = 0
-         sumaRow = 0
-         for row in range(9):
-             for column in range(9):
-                 sumaCol += sudoku[column][row]
-                 sumaRow += sudoku[row][column]
-             if sumaRow == 45 and sumaCol == 45:
-                 validation.append(True)
-             else:
-                 validation.append(False)
-             sumaCol = 0
-             sumaRow = 0
+    # Funcion para determinar si se halló la solución
+    def is_solution(self, sudoku):
+        
+        # La suma de filas y la de columnas del sudoku deberán retornar 45(1+2+3+4+5+6+7+8+9)
+        validation = []
+        column_sum = 0
+        row_sum = 0
+        for row in range(9):
+            for column in range(9):
+                column_sum += sudoku[column][row]
+                row_sum += sudoku[row][column]
+            if row_sum == 45 and column_sum == 45:
+                validation.append(True)
+            else:
+                validation.append(False)
+            column_sum = 0
+            row_sum = 0
+        if False not in validation:
+            return True
+        return False
 
-         if False not in validation:
-             return True
-         return False
-
+    # Función para hallar la heurística de un estado
     def evaluation(self, sudoku):
         options = 0
-        # for row in range(9):
-        #     for column in range(9):
-        #         if sudoku[row][column] != solution[row][column]:
-        #             options+=1 
         for i in range(9):
             options += self.__calculate_options__(i,i,sudoku)
         return options
-
-#inicio del programa 
-totalStart = timer()
-game = Sudoku(example)
-print("\nSudoku inicial\n\n")
-game.show()
-print("\nEstado inicial\n\n")
-game.insert_row_values()
-game.show()
-print("\n----------------SOLUCION-------------\n")
-#Inicio de hill climbing
-hcStart = timer()
-game.hill_climbing()
-game.show()
-#fin del programa
-totalEnd = timer()
-print("\nTiempo transcurrido desde el inicio de:")
-print("Programa: "+ str(totalEnd - totalStart))
-print("Hill Climbing: "+ str(totalEnd - hcStart))
